@@ -20,9 +20,11 @@ import {
   ArrowRight,
   UserCog,
   Lock,
-  Unlock
+  Unlock,
+  TestTube // THÊM ICON TestTube
 } from 'lucide-react';
 import axios from 'axios';
+import MedicalServiceManager from '../components/admin/MedicalServiceManager'; // IMPORT COMPONENT MỚI
 
 // --- Cấu hình Axios ---
 const apiClient = axios.create({
@@ -541,7 +543,6 @@ export default function AdminPortalPage() {
   };
 
   return (
-    // ĐỔI h-screen THÀNH h-[calc(100vh-4rem)]
     <div className="flex h-[calc(100vh-4rem)] bg-gray-50 overflow-hidden">
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col z-10 shadow-sm">
@@ -554,6 +555,10 @@ export default function AdminPortalPage() {
             <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><LayoutDashboard className="w-5 h-5 mr-3" /> Tổng quan</button>
             <button onClick={() => setActiveTab('all_appointments')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'all_appointments' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><ClipboardList className="w-5 h-5 mr-3" /> Lịch hẹn Hệ thống</button>
             <button onClick={() => setActiveTab('specialties')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'specialties' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><Activity className="w-5 h-5 mr-3" /> Chuyên khoa</button>
+            
+            {/* THÊM TAB DỊCH VỤ CẬN LÂM SÀNG VÀO ĐÂY */}
+            <button onClick={() => setActiveTab('services')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'services' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><TestTube className="w-5 h-5 mr-3" /> Dịch vụ & CLS</button>
+            
             <button onClick={() => setActiveTab('doctors')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'doctors' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><BriefcaseMedical className="w-5 h-5 mr-3" /> Bác sĩ</button>
             <button onClick={() => setActiveTab('patients')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'patients' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><UserCog className="w-5 h-5 mr-3" /> Bệnh nhân</button>
             <button onClick={() => setActiveTab('schedules')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'schedules' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}><Calendar className="w-5 h-5 mr-3" /> Lịch làm việc</button>
@@ -574,6 +579,7 @@ export default function AdminPortalPage() {
             {activeTab === 'dashboard' && 'Bảng điều khiển Thống kê'}
             {activeTab === 'all_appointments' && 'Danh sách Lịch hẹn'}
             {activeTab === 'specialties' && 'Danh mục Chuyên khoa'}
+            {activeTab === 'services' && 'Danh mục Dịch vụ CLS'} {/* TIÊU ĐỀ KHI CHỌN TAB */}
             {activeTab === 'doctors' && 'Hồ sơ Đội ngũ Bác sĩ'}
             {activeTab === 'patients' && 'Quản lý Bệnh nhân'}
             {activeTab === 'schedules' && 'Phân bổ Lịch làm việc'}
@@ -590,6 +596,7 @@ export default function AdminPortalPage() {
           {activeTab === 'dashboard' && renderDashboard()}
           {activeTab === 'all_appointments' && renderAllAppointments()}
           {activeTab === 'specialties' && renderSpecialties()}
+          {activeTab === 'services' && <MedicalServiceManager />} {/* RENDER COMPONENT DỊCH VỤ */}
           {activeTab === 'doctors' && renderDoctors()}
           {activeTab === 'patients' && renderPatients()}
           {activeTab === 'schedules' && renderSchedules()}
