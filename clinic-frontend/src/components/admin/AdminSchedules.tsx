@@ -21,13 +21,13 @@ export default function AdminSchedules() {
   const [selectedDocId, setSelectedDocId] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [existingSchedules, setExistingSchedules] = useState<Schedule[]>([]);
-  const defaultSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  const defaultSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00'];
   const [customSlots, setCustomSlots] = useState<string[]>([]);
   const [customTimeInput, setCustomTimeInput] = useState<string>('08:30');
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [maxPatients, setMaxPatients] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // States cho việc sửa/xoá ca khám
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [editMaxPatients, setEditMaxPatients] = useState<number>(1);
@@ -75,12 +75,12 @@ export default function AdminSchedules() {
         timeSlot: slot,
         maxPatients: maxPatients
       }));
-      await apiClient.post('/admin/schedules/generate', { 
-        doctorId: parseInt(selectedDocId), 
-        date: selectedDate, 
-        slots: formattedSlots 
+      await apiClient.post('/admin/schedules/generate', {
+        doctorId: parseInt(selectedDocId),
+        date: selectedDate,
+        slots: formattedSlots
       });
-      alert('Tạo lịch làm việc thành công!'); setSelectedSlots([]); fetchExistingSchedules(); 
+      alert('Tạo lịch làm việc thành công!'); setSelectedSlots([]); fetchExistingSchedules();
     } catch (error) { alert('Có lỗi khi tạo lịch. Vui lòng kiểm tra lại!'); } finally { setIsLoading(false); }
   };
 
@@ -111,7 +111,7 @@ export default function AdminSchedules() {
   };
 
   const existingTimeSlots = existingSchedules.map(s => s.timeSlot);
-  
+
   // Tổng hợp tất cả các khung giờ để hiển thị
   const allSlotsToRender = Array.from(new Set([...defaultSlots, ...customSlots, ...existingTimeSlots])).sort();
 
@@ -149,23 +149,23 @@ export default function AdminSchedules() {
             <div>
               <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
                 <h3 className="font-bold text-lg text-gray-800">Khung giờ ngày <span className="text-blue-600">{selectedDate.split('-').reverse().join('/')}</span></h3>
-                
+
                 {/* Chọn giờ tuỳ chỉnh */}
                 <div className="flex items-center space-x-2">
-                  <input 
-                    type="time" 
-                    value={customTimeInput} 
-                    onChange={(e) => setCustomTimeInput(e.target.value)} 
+                  <input
+                    type="time"
+                    value={customTimeInput}
+                    onChange={(e) => setCustomTimeInput(e.target.value)}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                   />
-                  <button 
-                    onClick={handleAddCustomSlot} 
+                  <button
+                    onClick={handleAddCustomSlot}
                     className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                   >
                     Thêm giờ
                   </button>
                 </div>
-                
+
                 <button onClick={handleGenerateSchedules} disabled={selectedSlots.length === 0 || isLoading} className={`px-4 py-2 rounded-xl font-medium transition flex items-center ${selectedSlots.length === 0 || isLoading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'}`}>
                   <Plus className="w-4 h-4 mr-2" /> Tạo {selectedSlots.length} ca khám
                 </button>
@@ -177,9 +177,9 @@ export default function AdminSchedules() {
                     const isExisting = !!existingSchedule;
                     const isSelected = selectedSlots.includes(slot);
                     return (
-                      <button 
-                        key={slot} 
-                        onClick={() => isExisting ? handleEditSchedule(existingSchedule!) : toggleSlotSelection(slot)} 
+                      <button
+                        key={slot}
+                        onClick={() => isExisting ? handleEditSchedule(existingSchedule!) : toggleSlotSelection(slot)}
                         className={`py-3 rounded-xl border text-sm font-medium transition flex flex-col items-center justify-center relative overflow-hidden ${isExisting ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300' : isSelected ? 'bg-blue-50 border-blue-400 text-blue-700 shadow-sm ring-2 ring-blue-200' : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:bg-blue-50'}`}
                       >
                         {isExisting && <CheckCircle2 className="w-4 h-4 text-green-500 mb-1" />}
@@ -203,18 +203,18 @@ export default function AdminSchedules() {
               <h3 className="text-lg font-bold text-gray-900">Tuỳ chỉnh ca khám</h3>
               <button onClick={() => setEditingSchedule(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-sm text-gray-500 mb-4">Khung giờ: <strong className="text-gray-900 text-base">{editingSchedule.timeSlot}</strong></p>
               <label className="block text-sm font-medium text-gray-700 mb-1">Số bệnh nhân tối đa</label>
-              <input 
-                type="number" min="1" max="100" 
-                value={editMaxPatients} 
-                onChange={(e) => setEditMaxPatients(parseInt(e.target.value) || 1)} 
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+              <input
+                type="number" min="1" max="100"
+                value={editMaxPatients}
+                onChange={(e) => setEditMaxPatients(parseInt(e.target.value) || 1)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div className="flex flex-col space-y-3">
               <button onClick={handleUpdateSchedule} className="w-full py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">
                 Cập nhật ca khám
