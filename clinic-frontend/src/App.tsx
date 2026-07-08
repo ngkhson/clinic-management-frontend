@@ -15,6 +15,7 @@ import UserProfilePage from './pages/UserProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import AdminMedicinePage from './pages/AdminMedicinePage';
 import PaymentResultPage from './pages/PaymentResultPage';
+import SpecialtyDetailPage from './pages/SpecialtyDetailPage';
 
 // Một component trang chủ tạm thời để test sau khi đăng nhập thành công
 // const TemporaryHomePage = () => {
@@ -65,6 +66,7 @@ function App() {
         {/* Đường dẫn Đăng ký */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/doctor/:id" element={<DoctorDetailPage />} />
+        <Route path="/specialty/:id" element={<SpecialtyDetailPage />} />
         <Route path="/doctor-portal" element={<DoctorPortalPage />} />
         <Route path="/admin" element={<AdminPortalPage />} />
         <Route path="/patient-dashboard" element={<PatientDashboardPage />} />

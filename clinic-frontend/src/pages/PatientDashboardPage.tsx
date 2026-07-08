@@ -116,6 +116,18 @@ export default function PatientDashboardPage() {
     }
   };
 
+  // --- XỬ LÝ HUỶ LỊCH ---
+  const handleCancelAppointment = async (id: number) => {
+    if (!window.confirm('Bạn có chắc chắn muốn huỷ lịch khám này không?')) return;
+    try {
+      await apiClient.delete(`/appointments/${id}`);
+      alert('Huỷ lịch thành công!');
+      fetchAppointments();
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Có lỗi xảy ra khi huỷ lịch!');
+    }
+  };
+
   // --- ĐĂNG XUẤT ---
   const handleLogout = () => {
     localStorage.clear();
@@ -155,6 +167,7 @@ export default function PatientDashboardPage() {
               isLoading={isLoading}
               onViewRecord={handleViewRecord}
               onReview={handleOpenReview}
+              onCancel={handleCancelAppointment}
               onNavigateHome={() => navigate('/')}
             />
           )}

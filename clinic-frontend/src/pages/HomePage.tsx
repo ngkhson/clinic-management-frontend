@@ -137,9 +137,12 @@ export default function HomePage() {
                     <p className="text-gray-500 text-sm line-clamp-2 mb-4 flex-grow">
                       {specialty.description}
                     </p>
-                    <div className="mt-auto flex items-center text-blue-600 font-medium text-sm">
-                      Đặt khám ngay <ArrowRight className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
-                    </div>
+                    <button 
+                      onClick={() => navigate(`/specialty/${specialty.id}`)}
+                      className="mt-auto flex items-center text-blue-600 font-medium text-sm hover:underline"
+                    >
+                      Đặt khám chuyên khoa này <ArrowRight className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </div>
                 </div>
               ))}

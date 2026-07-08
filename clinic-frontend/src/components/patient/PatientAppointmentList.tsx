@@ -15,10 +15,11 @@ interface Props {
   isLoading: boolean;
   onViewRecord: (id: number) => void;
   onReview: (appt: Appointment) => void;
+  onCancel: (id: number) => void;
   onNavigateHome: () => void;
 }
 
-export default function PatientAppointmentList({ appointments, isLoading, onViewRecord, onReview, onNavigateHome }: Props) {
+export default function PatientAppointmentList({ appointments, isLoading, onViewRecord, onReview, onCancel, onNavigateHome }: Props) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING': return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"><AlertCircle className="w-3 h-3 mr-1" /> Chờ xác nhận</span>;
@@ -81,8 +82,15 @@ export default function PatientAppointmentList({ appointments, isLoading, onView
                           <Star className="w-4 h-4 mr-1.5 fill-yellow-500" /> Đánh giá
                         </button>
                       </div>
+                    ) : (appt.status === 'PENDING' || appt.status === 'CONFIRMED') ? (
+                      <button
+                        onClick={() => onCancel(appt.id)}
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl text-sm font-bold transition"
+                      >
+                        <AlertCircle className="w-4 h-4 mr-1.5" /> Huỷ lịch
+                      </button>
                     ) : (
-                      <span className="text-gray-400 text-sm italic">Chưa có kết quả</span>
+                      <span className="text-gray-400 text-sm italic">Không khả dụng</span>
                     )}
                   </td>
                 </tr>
