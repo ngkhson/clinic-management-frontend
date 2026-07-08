@@ -37,7 +37,7 @@ export default function MedicineImport({ onBack }: { onBack: () => void }) {
     try {
       const [supRes, medRes] = await Promise.all([
         apiClient.get('/suppliers/active'),
-        apiClient.get('/medicines')
+        apiClient.get('/medicines/all')
       ]);
       setSuppliers(supRes.data.result || supRes.data);
       setMedicines((medRes.data.result || medRes.data).filter((m: Medicine) => m.isActive)); // Chỉ lấy thuốc đang hoạt động

@@ -51,7 +51,7 @@ export default function AdminPortalPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-gray-50 overflow-hidden">
+    <div className="flex h-[calc(100vh-65px)] bg-gray-50 overflow-hidden">
       {/* SIDEBAR BÊN TRÁI */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col z-10 shadow-sm shrink-0">
         <div className="flex-1 overflow-y-auto py-6 min-h-0 custom-scrollbar">
@@ -92,10 +92,10 @@ export default function AdminPortalPage() {
           </nav>
         </div>
         <div className="p-4 border-t border-gray-100 space-y-2 shrink-0">
-          <button onClick={() => navigate('/profile')} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition">
+          <button onClick={() => navigate('/profile')} className="w-full flex items-center justify-center px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition">
             <UserRound className="w-5 h-5 mr-2" /> Hồ sơ cá nhân
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
+          <button onClick={handleLogout} className="w-full flex items-center justify-center px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
             <LogOut className="w-5 h-5 mr-2" /> Đăng xuất
           </button>
         </div>

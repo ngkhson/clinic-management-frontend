@@ -33,7 +33,7 @@ export default function MedicineSell({ onBack }: { onBack: () => void }) {
 
   const fetchMedicines = async () => {
     try {
-      const res = await apiClient.get('/medicines');
+      const res = await apiClient.get('/medicines/all');
       // Chỉ lấy thuốc đang hoạt động VÀ số lượng > 0 để hiển thị lên kệ bán
       setMedicines((res.data.result || res.data).filter((m: Medicine) => m.isActive && m.currentQuantity > 0));
     } catch (error) { console.error('Lỗi tải dữ liệu', error); }

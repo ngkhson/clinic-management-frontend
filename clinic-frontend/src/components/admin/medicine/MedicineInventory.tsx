@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Archive, Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Archive, Plus, Edit, Trash2, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -31,6 +31,11 @@ interface Props {
 export default function MedicineInventory({ onBack }: Props) {
   const [allMedicines, setAllMedicines] = useState<Medicine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const size = 10;
 
   // States Modal Thêm/Sửa
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,13 +46,21 @@ export default function MedicineInventory({ onBack }: Props) {
 
   useEffect(() => {
     fetchAllMedicines();
-  }, []);
+  }, [page, searchTerm]);
 
   const fetchAllMedicines = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get('/medicines');
-      setAllMedicines(res.data.result || res.data);
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+      });
+      if (searchTerm) queryParams.append('search', searchTerm);
+
+      const res = await apiClient.get(`/medicines?${queryParams.toString()}`);
+      const pageData = res.data.result || res.data;
+      setAllMedicines(pageData.content || []);
+      setTotalPages(pageData.totalPages || 0);
     } catch (error) {
       console.error('Lỗi tải danh sách thuốc:', error);
     } finally {
@@ -107,6 +120,19 @@ export default function MedicineInventory({ onBack }: Props) {
         </button>
       </div>
 
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input 
+            type="text" 
+            placeholder="Tìm tên hoặc mã thuốc..." 
+            value={searchTerm} 
+            onChange={e => { setSearchTerm(e.target.value); setPage(0); }} 
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
+          />
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -126,7 +152,7 @@ export default function MedicineInventory({ onBack }: Props) {
               {isLoading ? (
                 <tr><td colSpan={8} className="p-8 text-center text-gray-500">Đang tải...</td></tr>
               ) : allMedicines.length === 0 ? (
-                <tr><td colSpan={8} className="p-8 text-center text-gray-500">Kho trống.</td></tr>
+                <tr><td colSpan={8} className="p-8 text-center text-gray-500">Không tìm thấy thuốc nào.</td></tr>
               ) : (
                 allMedicines.map((med) => (
                   <tr key={med.id} className="hover:bg-gray-50 transition">
@@ -149,6 +175,31 @@ export default function MedicineInventory({ onBack }: Props) {
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination UI */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <span className="text-sm text-gray-500">
+              Trang {page + 1} / {totalPages}
+            </span>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => setPage(p => Math.max(0, p - 1))} 
+                disabled={page === 0}
+                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} 
+                disabled={page >= totalPages - 1}
+                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {isModalOpen && (
@@ -161,7 +212,18 @@ export default function MedicineInventory({ onBack }: Props) {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div><label className="block text-sm font-medium mb-1">Tên thuốc</label><input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1">Nhóm thuốc</label><input required type="text" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" /></div>
+                <div><label className="block text-sm font-medium mb-1">Nhóm thuốc</label>
+                  <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg outline-none bg-white focus:ring-2 focus:ring-blue-500">
+                    <option value="Kháng sinh">Kháng sinh</option>
+                    <option value="Giảm đau - Hạ sốt">Giảm đau - Hạ sốt</option>
+                    <option value="Vitamin - Khoáng chất">Vitamin - Khoáng chất</option>
+                    <option value="Thực phẩm chức năng">Thực phẩm chức năng</option>
+                    <option value="Thuốc bôi ngoài">Thuốc bôi ngoài</option>
+                    <option value="Thuốc tiêu hóa">Thuốc tiêu hóa</option>
+                    <option value="Thuốc hô hấp">Thuốc hô hấp</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
                 <div><label className="block text-sm font-medium mb-1">Đơn vị</label>
                   <select value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="w-full px-4 py-2 border rounded-lg outline-none bg-white focus:ring-2 focus:ring-blue-500">
                     <option value="Viên">Viên</option><option value="Gói">Gói</option><option value="Chai">Chai</option><option value="Ống">Ống</option><option value="Vỉ">Vỉ</option>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserRound, Lock, Unlock } from 'lucide-react';
+import { UserRound, Lock, Unlock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -18,16 +18,28 @@ interface Patient { id: number; fullName: string; email: string; phone: string; 
 export default function AdminPatients() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const size = 10;
 
   useEffect(() => {
     fetchPatients();
-  }, []);
+  }, [page, searchTerm]);
 
   const fetchPatients = async () => {
     setIsLoading(true);
     try {
-      const res = await apiClient.get('/admin/patients');
-      setPatients(res.data.result || res.data);
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+      });
+      if (searchTerm) queryParams.append('search', searchTerm);
+
+      const res = await apiClient.get(`/admin/patients?${queryParams.toString()}`);
+      const pageData = res.data.result || res.data;
+      setPatients(pageData.content || []);
+      setTotalPages(pageData.totalPages || 0);
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 
@@ -47,9 +59,23 @@ export default function AdminPatients() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-800">Quản lý Bệnh Nhân</h2>
       </div>
+
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input 
+            type="text" 
+            placeholder="Tìm tên, email hoặc SĐT..." 
+            value={searchTerm} 
+            onChange={e => { setSearchTerm(e.target.value); setPage(0); }} 
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" 
+          />
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
@@ -62,7 +88,7 @@ export default function AdminPatients() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {isLoading ? <tr><td colSpan={4} className="p-6 text-center text-gray-500">Đang tải...</td></tr> : 
-             patients.length === 0 ? <tr><td colSpan={4} className="p-6 text-center text-gray-500">Chưa có bệnh nhân nào.</td></tr> :
+             patients.length === 0 ? <tr><td colSpan={4} className="p-6 text-center text-gray-500">Không tìm thấy bệnh nhân nào.</td></tr> :
              patients.map(patient => (
               <tr key={patient.id} className="hover:bg-gray-50 transition">
                 <td className="p-4 flex items-center">
@@ -87,6 +113,31 @@ export default function AdminPatients() {
             ))}
           </tbody>
         </table>
+        
+        {/* Pagination UI */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <span className="text-sm text-gray-500">
+              Trang {page + 1} / {totalPages}
+            </span>
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => setPage(p => Math.max(0, p - 1))} 
+                disabled={page === 0}
+                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} 
+                disabled={page >= totalPages - 1}
+                className="p-2 border border-gray-200 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

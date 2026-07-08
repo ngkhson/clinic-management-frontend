@@ -329,7 +329,7 @@ export default function AdminBilling() {
     setIsLoading(true);
     try {
       const [appRes, invRes] = await Promise.all([
-        apiClient.get('/admin/all-appointments'),
+        apiClient.get('/admin/all-appointments/all'),
         apiClient.get('/invoices')
       ]);
       setAppointments(appRes.data.result || appRes.data);
@@ -676,11 +676,9 @@ export default function AdminBilling() {
                   </td>
                   <td className="p-4 text-center text-sm text-gray-600">{inv.paidAt ? new Date(inv.paidAt).toLocaleString('vi-VN') : '---'}</td>
                   <td className="p-4 text-center">
-                    {inv.type === 'MEDICAL' && (
-                      <button onClick={() => handlePrintInvoice(inv)} className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-sm font-bold transition">
-                        <Printer className="w-4 h-4 mr-1.5" /> In phiếu
-                      </button>
-                    )}
+                    <button onClick={() => handlePrintInvoice(inv)} className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-sm font-bold transition">
+                      <Printer className="w-4 h-4 mr-1.5" /> In phiếu
+                    </button>
                   </td>
                   </tr>
                 ))}

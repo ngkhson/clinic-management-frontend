@@ -58,8 +58,8 @@ export default function AdminReception() {
         fetchPatientsList();
         const [specRes, docRes, apptRes] = await Promise.all([
           apiClient.get('/specialties'),
-          apiClient.get('/admin/doctors'),
-          apiClient.get('/admin/all-appointments')
+          apiClient.get('/admin/doctors/all'),
+          apiClient.get('/admin/all-appointments/all')
         ]);
         setSpecialties(specRes.data.result || specRes.data);
         setDoctors(docRes.data.result || docRes.data);
@@ -70,7 +70,7 @@ export default function AdminReception() {
   }, []);
 
   const fetchPatientsList = async () => {
-    try { const patRes = await apiClient.get('/admin/patients'); setPatients(patRes.data.result || patRes.data); } 
+    try { const patRes = await apiClient.get('/admin/patients/all'); setPatients(patRes.data.result || patRes.data); } 
     catch (error) { console.error(error); }
   };
 
@@ -154,7 +154,7 @@ export default function AdminReception() {
       setSuccessMsg('Tiếp nhận thành công! Bệnh nhân đã được chuyển vào hàng đợi của Bác sĩ.');
       
       // Reload lại danh sách lịch hẹn để cập nhật trạng thái
-      const apptRes = await apiClient.get('/admin/all-appointments');
+      const apptRes = await apiClient.get('/admin/all-appointments/all');
       setAllAppointments(apptRes.data.result || apptRes.data);
 
       setTimeout(() => {

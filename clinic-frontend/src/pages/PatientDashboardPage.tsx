@@ -164,7 +164,7 @@ export default function PatientDashboardPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] bg-gray-50 overflow-hidden">
+    <div className="flex h-[calc(100vh-65px)] bg-gray-50 overflow-hidden">
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col z-10 shadow-sm h-full shrink-0">
         <div className="flex-1 overflow-y-auto py-6 min-h-0">

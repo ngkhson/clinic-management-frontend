@@ -26,7 +26,7 @@ export default function AdminDashboard({ onNavigate }: { onNavigate: (tab: strin
       try {
         const [statsRes, appRes] = await Promise.all([
           apiClient.get('/admin/stats'),
-          apiClient.get('/admin/all-appointments')
+          apiClient.get('/admin/all-appointments/all')
         ]);
         setStats(statsRes.data.result || statsRes.data);
         const sorted = (appRes.data.result || appRes.data).sort((a: any, b: any) => b.id - a.id);

@@ -34,7 +34,7 @@ export default function AdminSchedules() {
 
   useEffect(() => {
     const fetchDoctors = async () => {
-      try { const res = await apiClient.get('/admin/doctors'); setDoctors(res.data.result || res.data); } catch (e) { console.error(e); }
+      try { const res = await apiClient.get('/admin/doctors/all'); setDoctors(res.data.result || res.data); } catch (e) { console.error(e); }
     };
     fetchDoctors();
   }, []);
