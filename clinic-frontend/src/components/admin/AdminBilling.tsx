@@ -295,6 +295,8 @@ export default function AdminBilling() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('ALL');
+  const [filterPayment, setFilterPayment] = useState('ALL');
 
   // Modal Thanh toán
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
@@ -460,7 +462,7 @@ export default function AdminBilling() {
           <div>Hotline: 1900 1234 - Website: medicare.vn</div>
         </div>
         <div class="doc-title">HÓA ĐƠN THU TIỀN VIỆN PHÍ</div>
-        <div><strong>Mã Hóa Đơn:</strong> #INV-${inv.id}</div>
+        <div><strong>Mã Hóa Đơn:</strong> ${inv.type === 'RETAIL' ? 'RET' : 'INV'}-${inv.id}</div>
         <div><strong>Tên bệnh nhân:</strong> ${inv.patientName}</div>
         <div><strong>Bác sĩ chỉ định:</strong> BS. ${inv.doctorName}</div>
         <div><strong>Hình thức thanh toán:</strong> ${inv.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản / Online'}</div>
@@ -520,12 +522,20 @@ export default function AdminBilling() {
   );
 
   const unpaidInvoices = invoices.filter(i => 
-    i.status === 'UNPAID' && i.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+    i.type === 'MEDICAL' && i.status === 'UNPAID' && i.patientName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const paidInvoices = invoices.filter(i => 
-    i.status === 'PAID' && i.patientName.toLowerCase().includes(searchTerm.toLowerCase())
-  ).sort((a, b) => b.id - a.id);
+  const paidInvoices = invoices.filter(i => {
+    if (i.status !== 'PAID') return false;
+    const displayId = i.type === 'RETAIL' ? `RET-${i.id}` : `INV-${i.id}`;
+    if (!i.patientName.toLowerCase().includes(searchTerm.toLowerCase()) && !displayId.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filterType !== 'ALL' && i.type !== filterType) return false;
+    if (filterPayment !== 'ALL') {
+      if (filterPayment === 'TRANSFER' && (i.paymentMethod !== 'TRANSFER' && i.paymentMethod !== 'VNPAY')) return false;
+      if (filterPayment === 'CASH' && i.paymentMethod !== 'CASH') return false;
+    }
+    return true;
+  }).sort((a, b) => b.id - a.id);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -539,11 +549,25 @@ export default function AdminBilling() {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-        <div className="relative max-w-md">
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input type="text" placeholder="Tìm tên bệnh nhân..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+          <input type="text" placeholder="Tìm tên bệnh nhân hoặc mã HĐ..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
         </div>
+        {activeTab === 'PAID' && (
+          <div className="flex gap-4">
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="py-2 px-4 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-600">
+              <option value="ALL">Tất cả loại HĐ</option>
+              <option value="MEDICAL">Khám bệnh</option>
+              <option value="RETAIL">Bán lẻ thuốc</option>
+            </select>
+            <select value={filterPayment} onChange={e => setFilterPayment(e.target.value)} className="py-2 px-4 border border-gray-200 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-600">
+              <option value="ALL">Tất cả hình thức</option>
+              <option value="CASH">Tiền mặt</option>
+              <option value="TRANSFER">VNPay/Chuyển khoản</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -634,12 +658,15 @@ export default function AdminBilling() {
             <tbody className="divide-y divide-gray-50">
               {paidInvoices.length === 0 ? <tr><td colSpan={6} className="p-8 text-center text-gray-500">Chưa có lịch sử thu tiền.</td></tr> : 
                paidInvoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-gray-50 transition">
-                  <td className="p-4 text-gray-400 font-medium">#{inv.id} {inv.type === 'RETAIL' && <span className="ml-1 text-[10px] bg-teal-100 text-teal-700 px-1 py-0.5 rounded">BÁN LẺ</span>}</td>
+                <tr key={`${inv.type}-${inv.id}`} className="hover:bg-gray-50 transition">
+                  <td className="p-4 text-gray-400 font-medium">
+                    {inv.type === 'RETAIL' ? `RET-${inv.id}` : `INV-${inv.id}`} 
+                    {inv.type === 'RETAIL' && <span className="ml-1 text-[10px] bg-teal-100 text-teal-700 px-1 py-0.5 rounded">BÁN LẺ</span>}
+                  </td>
                   <td className="p-4 font-bold text-gray-900">{inv.patientName}</td>
                   <td className="p-4 text-right font-black text-green-600">{formatMoney(inv.totalAmount)}</td>
                   <td className="p-4 text-center">
-                    {inv.paymentMethod === 'CASH' ? <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold">Tiền mặt</span> : <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">Chuyển khoản / Online</span>}
+                    {inv.paymentMethod === 'CASH' ? <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-bold">Tiền mặt</span> : <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-bold">Chuyển khoản / VNPay</span>}
                   </td>
                   <td className="p-4 text-center text-sm text-gray-600">{inv.paidAt ? new Date(inv.paidAt).toLocaleString('vi-VN') : '---'}</td>
                   <td className="p-4 text-center">

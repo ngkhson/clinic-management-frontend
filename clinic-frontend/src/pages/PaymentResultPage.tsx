@@ -11,23 +11,29 @@ const apiClient = axios.create({
 export default function PaymentResultPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [status, setStatus] = useState<'LOADING' | 'SUCCESS' | 'ERROR'>('LOADING');
   const [amount, setAmount] = useState<string>('0');
   const [orderInfo, setOrderInfo] = useState<string>('');
+  const [paymentType, setPaymentType] = useState<'INV' | 'RET'>('INV');
 
   useEffect(() => {
     // VNPAY trả về rất nhiều tham số, ta lấy các tham số quan trọng nhất
     const vnp_ResponseCode = searchParams.get('vnp_ResponseCode');
     const vnp_Amount = searchParams.get('vnp_Amount');
     const vnp_OrderInfo = searchParams.get('vnp_OrderInfo');
-    
+    const vnp_TxnRef = searchParams.get('vnp_TxnRef');
+
+    if (vnp_TxnRef && vnp_TxnRef.startsWith('RET')) {
+      setPaymentType('RET');
+    }
+
     if (vnp_Amount) {
       // VNPAY nhân số tiền lên 100 lần, nên ta cần chia lại cho 100
       const actualAmount = parseInt(vnp_Amount) / 100;
       setAmount(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(actualAmount));
     }
-    
+
     if (vnp_OrderInfo) {
       setOrderInfo(vnp_OrderInfo);
     }
@@ -47,7 +53,7 @@ export default function PaymentResultPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 max-w-md w-full text-center animate-fade-in">
-        
+
         {status === 'LOADING' && (
           <div className="flex flex-col items-center justify-center py-10">
             <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
@@ -62,8 +68,12 @@ export default function PaymentResultPage() {
               <CheckCircle2 className="w-12 h-12 text-green-600" />
             </div>
             <h2 className="text-2xl font-black text-gray-900 mb-2">Thanh toán thành công!</h2>
-            <p className="text-gray-600 mb-6">Cảm ơn bạn đã sử dụng dịch vụ của MediCare. Lịch hẹn của bạn đã được xác nhận tự động.</p>
-            
+            {paymentType === 'INV' ? (
+              <p className="text-gray-600 mb-6">Cảm ơn bạn đã sử dụng dịch vụ của MediCare. Lịch hẹn của bạn đã được xác nhận tự động.</p>
+            ) : (
+              <p className="text-gray-600 mb-6">Hóa đơn bán lẻ đã được thanh toán thành công và ghi nhận vào hệ thống.</p>
+            )}
+
             <div className="bg-gray-50 w-full p-4 rounded-2xl mb-8 text-left space-y-2 border border-gray-100">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Số tiền thanh toán:</span>
@@ -76,9 +86,22 @@ export default function PaymentResultPage() {
             </div>
 
             <div className="flex flex-col w-full space-y-3">
-              <button onClick={() => navigate('/patient-dashboard')} className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition">
-                <Calendar className="w-5 h-5 mr-2" /> Xem lịch hẹn của tôi
-              </button>
+              {paymentType === 'INV' ? (
+                <button onClick={() => navigate('/patient-dashboard')} className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition">
+                  <Calendar className="w-5 h-5 mr-2" /> Xem lịch hẹn của tôi
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    const role = localStorage.getItem('role');
+                    if (role === 'ADMIN' || role === 'RECEPTIONIST' || role === 'PHARMACIST') navigate('/admin');
+                    else navigate('/');
+                  }}
+                  className="w-full flex items-center justify-center px-6 py-3 bg-teal-600 text-white font-bold rounded-xl shadow-sm hover:bg-teal-700 transition"
+                >
+                  Quay lại màn hình quản lý
+                </button>
+              )}
               <button onClick={() => navigate('/')} className="w-full flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition">
                 <Home className="w-5 h-5 mr-2" /> Về Trang chủ
               </button>
@@ -92,16 +115,19 @@ export default function PaymentResultPage() {
               <XCircle className="w-12 h-12 text-red-600" />
             </div>
             <h2 className="text-2xl font-black text-gray-900 mb-2">Thanh toán thất bại</h2>
-            <p className="text-gray-600 mb-8">Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán. Lịch hẹn chưa được xác nhận.</p>
-            
+            <p className="text-gray-600 mb-8">
+              Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán.
+              {paymentType === 'INV' ? ' Lịch hẹn chưa được xác nhận.' : ' Hóa đơn bán lẻ chưa được thanh toán.'}
+            </p>
+
             <div className="flex flex-col w-full space-y-3">
-              <button 
+              <button
                 onClick={() => {
                   const role = localStorage.getItem('role');
                   if (role === 'PATIENT') navigate('/patient-dashboard');
-                  else if (role === 'ADMIN' || role === 'RECEPTIONIST') navigate('/admin-portal');
+                  else if (role === 'ADMIN' || role === 'RECEPTIONIST') navigate('/admin');
                   else navigate('/');
-                }} 
+                }}
                 className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition"
               >
                 Quay lại màn hình quản lý
