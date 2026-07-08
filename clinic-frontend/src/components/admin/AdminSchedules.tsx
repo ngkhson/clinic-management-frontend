@@ -23,6 +23,7 @@ export default function AdminSchedules() {
   const [existingSchedules, setExistingSchedules] = useState<Schedule[]>([]);
   const defaultSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [maxPatients, setMaxPatients] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function AdminSchedules() {
     try {
       const formattedSlots = selectedSlots.map(slot => ({
         timeSlot: slot,
-        maxPatients: 1
+        maxPatients: maxPatients
       }));
       await apiClient.post('/admin/schedules/generate', { 
         doctorId: parseInt(selectedDocId), 
@@ -86,6 +87,10 @@ export default function AdminSchedules() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Chọn Ngày</label>
               <input type="date" min={new Date().toISOString().split('T')[0]} value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Số bệnh nhân tối đa / ca</label>
+              <input type="number" min="1" max="100" value={maxPatients} onChange={(e) => setMaxPatients(parseInt(e.target.value) || 1)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
         </div>
