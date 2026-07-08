@@ -132,9 +132,10 @@ export default function PatientDashboardPage() {
   const handlePayInvoice = async (appointmentId: number) => {
     try {
       const res = await apiClient.get(`/invoices/appointment/${appointmentId}`);
-      const invoice = res.data.result || res.data;
+      const invoice = res.data.result;
+      
       if (!invoice) {
-        alert('Ca khám này chưa được lập hóa đơn.');
+        alert('Ca khám này chưa được bộ phận Thu ngân lập hóa đơn. Vui lòng đợi trong giây lát hoặc liên hệ quầy tiếp đón!');
         return;
       }
       if (invoice.status === 'PAID') {

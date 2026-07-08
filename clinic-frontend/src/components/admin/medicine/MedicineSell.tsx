@@ -22,6 +22,7 @@ export default function MedicineSell({ onBack }: { onBack: () => void }) {
   
   // States cho Form POS
   const [customerName, setCustomerName] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'TRANSFER'>('CASH');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -82,6 +83,7 @@ export default function MedicineSell({ onBack }: { onBack: () => void }) {
     try {
       const payload = {
         customerName: customerName.trim() === '' ? 'Khách mua lẻ' : customerName,
+        paymentMethod: paymentMethod,
         details: cart.map(item => ({
           medicineId: item.medicineId,
           quantity: item.quantity,
@@ -89,10 +91,26 @@ export default function MedicineSell({ onBack }: { onBack: () => void }) {
         }))
       };
 
-      await apiClient.post('/retail', payload);
+      const res = await apiClient.post('/retail', payload);
+      
+      if (paymentMethod === 'TRANSFER') {
+         const invoice = res.data.result;
+         if (invoice && invoice.id) {
+            const payRes = await apiClient.post('/payment/create-url', {
+               targetType: 'RETAIL',
+               targetId: invoice.id
+            });
+            const url = payRes.data.result;
+            if (url) {
+               window.location.href = url;
+               return; // Dừng tại đây, không hiện success vội
+            }
+         }
+      }
+      
       setIsSuccess(true);
     } catch (error: any) {
-      alert(error.response?.data || 'Có lỗi xảy ra khi tạo hóa đơn!');
+      alert(error.response?.data?.message || error.response?.data || 'Có lỗi xảy ra khi tạo hóa đơn!');
     } finally {
       setIsSubmitting(false);
     }
@@ -215,12 +233,24 @@ export default function MedicineSell({ onBack }: { onBack: () => void }) {
                </span>
              </div>
              
+             <div className="mb-5 space-y-2">
+               <label className="block text-xs font-bold text-gray-500 uppercase">Hình thức thanh toán</label>
+               <div className="grid grid-cols-2 gap-3">
+                 <button onClick={() => setPaymentMethod('CASH')} className={`py-2 px-3 border-2 rounded-xl text-sm font-bold transition ${paymentMethod === 'CASH' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                   Tiền mặt
+                 </button>
+                 <button onClick={() => setPaymentMethod('TRANSFER')} className={`py-2 px-3 border-2 rounded-xl text-sm font-bold transition ${paymentMethod === 'TRANSFER' ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}>
+                   Chuyển khoản (VNPay)
+                 </button>
+               </div>
+             </div>
+             
              <button 
                onClick={handleSubmit} 
                disabled={isSubmitting || cart.length === 0}
                className={`w-full py-4 rounded-xl font-bold text-white text-lg shadow-sm transition flex items-center justify-center ${isSubmitting || cart.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-700 hover:shadow-md'}`}
              >
-               {isSubmitting ? 'Đang xuất hóa đơn...' : <><ShoppingCart className="w-5 h-5 mr-2" /> Thanh Toán Ngay</>}
+               {isSubmitting ? 'Đang xuất hóa đơn...' : paymentMethod === 'TRANSFER' ? <><ShoppingCart className="w-5 h-5 mr-2" /> Mở cổng thanh toán VNPAY</> : <><CheckCircle2 className="w-5 h-5 mr-2" /> Thanh Toán Xong</>}
              </button>
            </div>
         </div>

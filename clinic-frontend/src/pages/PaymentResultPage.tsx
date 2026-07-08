@@ -95,8 +95,16 @@ export default function PaymentResultPage() {
             <p className="text-gray-600 mb-8">Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán. Lịch hẹn chưa được xác nhận.</p>
             
             <div className="flex flex-col w-full space-y-3">
-              <button onClick={() => navigate(-1)} className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition">
-                Thử thanh toán lại
+              <button 
+                onClick={() => {
+                  const role = localStorage.getItem('role');
+                  if (role === 'PATIENT') navigate('/patient-dashboard');
+                  else if (role === 'ADMIN' || role === 'RECEPTIONIST') navigate('/admin-portal');
+                  else navigate('/');
+                }} 
+                className="w-full flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition"
+              >
+                Quay lại màn hình quản lý
               </button>
               <button onClick={() => navigate('/')} className="w-full flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition">
                 <Home className="w-5 h-5 mr-2" /> Về Trang chủ

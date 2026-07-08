@@ -36,8 +36,11 @@ export default function HomePage() {
           apiClient.get('/admin/doctors') // Dùng tạm API này, nhớ cấu hình permitAll() bên Spring Security
         ]);
         
-        const specs = specsRes.data.result || specsRes.data || [];
-        const docs = docsRes.data.result || docsRes.data || [];
+        const specsData = specsRes.data.result !== undefined ? specsRes.data.result : specsRes.data;
+        const docsData = docsRes.data.result !== undefined ? docsRes.data.result : docsRes.data;
+        
+        const specs = Array.isArray(specsData) ? specsData : [];
+        const docs = Array.isArray(docsData) ? docsData : [];
         
         setSpecialties(specs);
         // Chỉ lấy 4 bác sĩ nổi bật nhất để hiển thị ở trang chủ
