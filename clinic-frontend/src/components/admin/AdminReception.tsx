@@ -18,7 +18,7 @@ apiClient.interceptors.request.use((config: any) => {
 
 interface Patient { id: number; fullName: string; email: string; phone: string; gender: string; address: string; status: string; dateOfBirth?: string; }
 interface Specialty { id: number; name: string; description: string; imageUrl: string; }
-interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; examinationPrice: number; specialtyId?: number;}
+interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; specialtyId?: number;}
 interface Schedule { id: number; timeSlot: string; currentPatients: number; maxPatients: number; available?: boolean; }
 interface Appointment { id: number; patientName: string; doctorName: string; timeSlot: string; appointmentDate: string; status: string; symptoms: string; }
 

@@ -13,7 +13,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; examinationPrice: number; }
+interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; }
 interface Specialty { id: number; name: string; }
 
 export default function AdminDoctors() {
@@ -24,7 +24,7 @@ export default function AdminDoctors() {
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docMode, setDocMode] = useState<'ADD' | 'EDIT'>('ADD');
   const [selectedDocIdForEdit, setSelectedDocIdForEdit] = useState<number | null>(null);
-  const [docForm, setDocForm] = useState({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '', examinationPrice: '' });
+  const [docForm, setDocForm] = useState({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '' });
 
   useEffect(() => {
     fetchDoctors();
@@ -43,7 +43,7 @@ export default function AdminDoctors() {
   const handleSaveDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = { ...docForm, specialtyId: parseInt(docForm.specialtyId), examinationPrice: parseFloat(docForm.examinationPrice) };
+      const payload = { ...docForm, specialtyId: parseInt(docForm.specialtyId) };
       
       if (docMode === 'ADD') {
         await apiClient.post('/admin/doctors', payload);
@@ -73,7 +73,7 @@ export default function AdminDoctors() {
   const openAddDoctorModal = () => {
     setDocMode('ADD');
     setSelectedDocIdForEdit(null);
-    setDocForm({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '', examinationPrice: '' });
+    setDocForm({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '' });
     setIsDocModalOpen(true);
   };
 
@@ -87,8 +87,7 @@ export default function AdminDoctors() {
       fullName: doc.fullName, 
       specialtyId: spec ? spec.id.toString() : '', 
       degree: doc.degree, 
-      biography: doc.biography, 
-      examinationPrice: doc.examinationPrice.toString() 
+      biography: doc.biography
     });
     setIsDocModalOpen(true);
   };
@@ -104,7 +103,7 @@ export default function AdminDoctors() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 text-sm border-b border-gray-100">
-            <tr><th className="p-4 font-semibold">Bác sĩ</th><th className="p-4 font-semibold">Chuyên khoa</th><th className="p-4 font-semibold">Giá khám</th><th className="p-4 font-semibold text-center">Hành động</th></tr>
+            <tr><th className="p-4 font-semibold">Bác sĩ</th><th className="p-4 font-semibold">Chuyên khoa</th><th className="p-4 font-semibold text-center">Hành động</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {isLoading ? <tr><td colSpan={4} className="p-6 text-center text-gray-500">Đang tải...</td></tr> : 
@@ -116,7 +115,7 @@ export default function AdminDoctors() {
                    <div><div className="font-bold text-gray-900">{doc.degree} {doc.fullName}</div><div className="text-xs text-gray-400">ID: #{doc.id}</div></div>
                 </td>
                 <td className="p-4 text-gray-600"><span className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-medium">{doc.specialtyName}</span></td>
-                <td className="p-4 text-green-600 font-bold">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(doc.examinationPrice)}</td>
+
                 <td className="p-4 text-center">
                   <button onClick={() => openEditDoctorModal(doc)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg mr-2 transition" title="Chỉnh sửa"><Edit className="w-5 h-5" /></button>
                   <button onClick={() => handleDeleteDoctor(doc.id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition" title="Xóa"><Trash2 className="w-5 h-5" /></button>
@@ -147,7 +146,7 @@ export default function AdminDoctors() {
                   </select>
                 </div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Học vị <span className="text-red-500">*</span></label><input required type="text" value={docForm.degree} onChange={(e) => setDocForm({...docForm, degree: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="VD: ThS. BS." /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Giá khám (VNĐ) <span className="text-red-500">*</span></label><input required type="number" min="0" value={docForm.examinationPrice} onChange={(e) => setDocForm({...docForm, examinationPrice: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" /></div>
+
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Giới thiệu chi tiết</label><textarea value={docForm.biography} onChange={(e) => setDocForm({...docForm, biography: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none resize-none" rows={3} placeholder="Kinh nghiệm làm việc, thế mạnh chuyên môn..."></textarea></div>
             </form>
