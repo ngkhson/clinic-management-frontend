@@ -35,7 +35,8 @@ export default function RegisterPage() {
       const response = await apiClient.post('/auth/register', formData);
 
       // Back-end sẽ trả về Token ngay sau khi đăng ký thành công
-      const token = response.data.token;
+      const result = response.data.result || response.data;
+      const token = result.token;
       
       // Lưu Token và Email vào LocalStorage
       localStorage.setItem('token', token);

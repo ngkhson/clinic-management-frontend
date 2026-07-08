@@ -22,8 +22,9 @@ export default function LoginPage() {
       });
 
       // Lấy token và role từ backend trả về
-      const token = response.data.token;
-      const role = response.data.role; // LẤY ROLE TỪ API
+      const result = response.data.result || response.data;
+      const token = result.token;
+      const role = result.role; // LẤY ROLE TỪ API
 
       // Lưu vào LocalStorage
       localStorage.setItem('token', token);
