@@ -59,7 +59,7 @@ export default function UserProfilePage() {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await apiClient.put('/users/profile', profile);
+      await apiClient.patch('/users/profile', profile);
       setMessage({ text: 'Cập nhật thông tin cá nhân thành công!', type: 'success' });
       // Phát sự kiện để cập nhật lại tên hiển thị trên Navbar nếu cần
       window.dispatchEvent(new Event('authChange'));
@@ -79,7 +79,7 @@ export default function UserProfilePage() {
     }
     setIsChangingPwd(true);
     try {
-        await apiClient.put('/users/change-password', {
+        await apiClient.patch('/users/change-password', {
             oldPassword: pwdForm.oldPassword,
             newPassword: pwdForm.newPassword
         });

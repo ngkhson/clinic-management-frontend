@@ -19,7 +19,6 @@ interface Doctor {
   fullName: string;
   degree: string;
   specialtyName: string;
-  examinationPrice: number;
 }
 
 export default function HomePage() {
@@ -172,9 +171,7 @@ export default function HomePage() {
                   <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-semibold mt-2 mb-3">
                     {doc.specialtyName}
                   </span>
-                  <p className="text-gray-900 font-bold mb-4">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(doc.examinationPrice)}
-                  </p>
+
                   <button 
                     onClick={() => navigate(`/doctor/${doc.id}`)}
                     className="w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-600 hover:text-white transition-colors mt-auto"

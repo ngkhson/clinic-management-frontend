@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, MemoryRouter, Routes, Route } from 'react-router-dom';
-import { UserRound, Calendar as CalendarIcon, Clock, CreditCard, ArrowRight, CheckCircle2, Star, MessageSquareQuote } from 'lucide-react';
+import { UserRound, Calendar as CalendarIcon, Clock, ArrowRight, CheckCircle2, Star, MessageSquareQuote } from 'lucide-react';
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -24,7 +24,6 @@ interface Doctor {
   specialtyName: string;
   degree: string;
   biography: string;
-  examinationPrice: number;
 }
 
 interface Schedule {
@@ -184,10 +183,7 @@ function DoctorDetailPageContent() {
                 {doctor.biography || 'Bác sĩ chưa cập nhật thông tin giới thiệu.'}
               </p>
               
-              <div className="mt-5 inline-flex items-center text-gray-700 bg-blue-50/50 px-4 py-2 rounded-xl border border-blue-100">
-                <CreditCard className="w-5 h-5 mr-2 text-blue-500" />
-                <span>Giá khám: <strong className="text-blue-700 ml-1 text-lg">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(doctor.examinationPrice)}</strong></span>
-              </div>
+
             </div>
           </div>
 
