@@ -368,16 +368,27 @@ export default function AdminBilling() {
     return () => clearInterval(interval);
   }, [isPayModalOpen, paymentMethod, selectedInvoice, invoices]);
 
-  // Xử lý thu tiền thủ công (Cho tiền mặt)
+  // Xử lý thu tiền
   const handlePayInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedInvoice) return;
     setIsProcessing(true);
     try {
-      await apiClient.put(`/invoices/${selectedInvoice.id}/pay?method=${paymentMethod}`);
-      setIsPayModalOpen(false);
-      fetchData();
-      alert('Thanh toán thành công!');
+      if (paymentMethod === 'TRANSFER') {
+        const res = await apiClient.post('/payment/create-url', {
+          targetType: 'INVOICE',
+          targetId: selectedInvoice.id
+        });
+        const url = res.data.result || res.data;
+        if (url) {
+          window.location.href = url;
+        }
+      } else {
+        await apiClient.put(`/invoices/${selectedInvoice.id}/pay?method=${paymentMethod}`);
+        setIsPayModalOpen(false);
+        fetchData();
+        alert('Thanh toán thành công!');
+      }
     } catch (error) {
       alert('Có lỗi xảy ra khi thanh toán!');
     } finally {
@@ -660,33 +671,16 @@ export default function AdminBilling() {
                 </div>
               </div>
 
-              {/* TÍCH HỢP MÃ QR CHUYỂN KHOẢN TỰ ĐỘNG BẰNG VIETQR */}
+              {/* THANH TOÁN VNPAY ONLINE */}
               {paymentMethod === 'TRANSFER' && (
-                <div className="mt-6 flex flex-col items-center justify-center p-5 bg-gray-50 rounded-2xl border border-gray-200 animate-fade-in relative overflow-hidden">
-                  {/* Overlay khi đang chờ ngân hàng */}
-                  {isWaitingForBank && (
-                     <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center">
-                        <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mb-2" />
-                        <span className="text-sm font-bold text-blue-700 bg-white px-3 py-1 rounded-full shadow-sm">Đang chờ thanh toán...</span>
-                     </div>
-                  )}
-
-                  <p className="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                    <QrCode className="w-4 h-4 mr-1.5 text-blue-600" /> Quét mã để thanh toán tự động
+                <div className="mt-6 flex flex-col items-center justify-center p-5 bg-blue-50 rounded-2xl border border-blue-200 animate-fade-in relative overflow-hidden">
+                  <p className="text-sm font-bold text-blue-800 mb-3 text-center">
+                    Tạo link thanh toán trực tuyến qua VNPAY cho bệnh nhân
                   </p>
-                  <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-                    <img 
-                      src={`https://img.vietqr.io/image/mbbank-0123456789-compact2.png?amount=${selectedInvoice.totalAmount}&addInfo=Thanh toan vien phi HD${selectedInvoice.id}&accountName=PHONG KHAM MEDICARE`}
-                      alt="VietQR"
-                      className="w-48 h-48 object-contain"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-3 text-center">Hệ thống sẽ tự động xác nhận khi nhận được tiền.</p>
-                  
-                  {/* Nút giả lập Webhook cho việc Test */}
-                  <button onClick={simulateBankWebhook} className="mt-4 text-xs font-bold text-purple-600 underline hover:text-purple-800 relative z-20">
-                     [Test] Giả lập Ngân hàng báo tiền đã vào
+                  <button onClick={handlePayInvoice} disabled={isProcessing} className={`w-full flex justify-center items-center px-6 py-3 font-bold rounded-xl text-white shadow-sm transition ${isProcessing ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                    {isProcessing ? 'Đang tạo link...' : <><QrCode className="w-5 h-5 mr-2" /> Mở cổng thanh toán VNPAY</>}
                   </button>
+                  <p className="text-xs text-blue-600 mt-3 text-center">Hệ thống sẽ chuyển hướng bạn đến cổng VNPAY an toàn.</p>
                 </div>
               )}
 

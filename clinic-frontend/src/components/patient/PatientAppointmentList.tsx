@@ -16,10 +16,11 @@ interface Props {
   onViewRecord: (id: number) => void;
   onReview: (appt: Appointment) => void;
   onCancel: (id: number) => void;
+  onPay: (id: number) => void;
   onNavigateHome: () => void;
 }
 
-export default function PatientAppointmentList({ appointments, isLoading, onViewRecord, onReview, onCancel, onNavigateHome }: Props) {
+export default function PatientAppointmentList({ appointments, isLoading, onViewRecord, onReview, onCancel, onPay, onNavigateHome }: Props) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING': return <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"><AlertCircle className="w-3 h-3 mr-1" /> Chờ xác nhận</span>;
@@ -74,6 +75,12 @@ export default function PatientAppointmentList({ appointments, isLoading, onView
                           className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-xl text-sm font-bold transition"
                         >
                           <FileText className="w-4 h-4 mr-2" /> Đơn Thuốc
+                        </button>
+                        <button
+                          onClick={() => onPay(appt.id)}
+                          className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-sm font-bold transition"
+                        >
+                          <FileText className="w-4 h-4 mr-1.5" /> Thanh toán
                         </button>
                         <button
                           onClick={() => onReview(appt)}

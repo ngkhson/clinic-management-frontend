@@ -128,6 +128,33 @@ export default function PatientDashboardPage() {
     }
   };
 
+  // --- XỬ LÝ THANH TOÁN ---
+  const handlePayInvoice = async (appointmentId: number) => {
+    try {
+      const res = await apiClient.get(`/invoices/appointment/${appointmentId}`);
+      const invoice = res.data.result || res.data;
+      if (!invoice) {
+        alert('Ca khám này chưa được lập hóa đơn.');
+        return;
+      }
+      if (invoice.status === 'PAID') {
+        alert('Hóa đơn này đã được thanh toán.');
+        return;
+      }
+      
+      const payRes = await apiClient.post('/payment/create-url', {
+        targetType: 'INVOICE',
+        targetId: invoice.id
+      });
+      const url = payRes.data.result || payRes.data;
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      alert('Có lỗi xảy ra khi tạo link thanh toán!');
+    }
+  };
+
   // --- ĐĂNG XUẤT ---
   const handleLogout = () => {
     localStorage.clear();
@@ -168,6 +195,7 @@ export default function PatientDashboardPage() {
               onViewRecord={handleViewRecord}
               onReview={handleOpenReview}
               onCancel={handleCancelAppointment}
+              onPay={handlePayInvoice}
               onNavigateHome={() => navigate('/')}
             />
           )}

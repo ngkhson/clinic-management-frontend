@@ -356,8 +356,8 @@ export default function MedicalRecordModal({ appointment, services, onClose, onS
           setIsLoadingDraft(true);
           const resDraft = await apiClient.get(`/doctor/medical-records/appointment/${appointment.id}`);
           
-          if (resDraft.status === 200 && resDraft.data) {
-            const data = resDraft.data;
+          if (resDraft.status === 200 && resDraft.data && resDraft.data.result) {
+            const data = resDraft.data.result;
             
             let parsedResultsMap = {};
             let otherNotes = '';
