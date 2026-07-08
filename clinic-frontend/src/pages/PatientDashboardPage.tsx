@@ -121,10 +121,6 @@ export default function PatientDashboardPage() {
     <div className="flex h-[calc(100vh-4rem)] bg-gray-50 overflow-hidden">
       {/* SIDEBAR */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col z-10 shadow-sm h-full shrink-0">
-        <div className="h-16 shrink-0 flex items-center px-6 border-b border-gray-200 bg-blue-50">
-          <Activity className="w-8 h-8 mr-2 text-blue-600" />
-          <span className="text-xl font-black text-gray-900 tracking-tight">Medi<span className="text-blue-600">Care</span></span>
-        </div>
         <div className="flex-1 overflow-y-auto py-6 min-h-0">
           <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Hồ sơ sức khỏe</p>
           <nav className="space-y-1.5 px-4">
@@ -132,14 +128,6 @@ export default function PatientDashboardPage() {
               <Calendar className="w-5 h-5 mr-3" /> Lịch sử khám bệnh
             </button>
           </nav>
-        </div>
-        <div className="p-4 border-t border-gray-100 space-y-2 shrink-0">
-          <button onClick={() => navigate('/profile')} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition">
-            <User className="w-5 h-5 mr-2" /> Hồ sơ cá nhân
-          </button>
-          <button onClick={handleLogout} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
-            <LogOut className="w-5 h-5 mr-2" /> Đăng xuất
-          </button>
         </div>
       </aside>
 
@@ -149,13 +137,6 @@ export default function PatientDashboardPage() {
           <h1 className="text-xl font-bold text-gray-800">
             Hồ sơ Bệnh nhân
           </h1>
-          <div className="flex items-center">
-            <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mr-3">BN</div>
-            <div>
-               <p className="text-sm font-bold text-gray-800 leading-tight">{userEmail}</p>
-               <p className="text-xs text-green-600 leading-tight flex items-center mt-0.5"><span className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span> Đang trực tuyến</p>
-            </div>
-          </div>
         </header>
         
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
