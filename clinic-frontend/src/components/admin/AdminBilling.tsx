@@ -297,6 +297,12 @@ export default function AdminBilling() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('ALL');
   const [filterPayment, setFilterPayment] = useState('ALL');
+  
+  // Pagination cho lịch sử
+  const [paidInvoices, setPaidInvoices] = useState<Invoice[]>([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const size = 10;
 
   // Modal Thanh toán
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
@@ -307,44 +313,55 @@ export default function AdminBilling() {
   // Trạng thái chờ Webhook ngân hàng
   const [isWaitingForBank, setIsWaitingForBank] = useState(false);
 
+  const fetchData = () => {
+    if (activeTab === 'PENDING') {
+      fetchPendingData();
+    } else {
+      fetchHistoryData();
+    }
+  };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [activeTab, page, filterType, filterPayment, searchTerm]);
 
-  const fetchData = async () => {
+  const fetchPendingData = async () => {
     setIsLoading(true);
     try {
-      const [appRes, invRes, retailRes] = await Promise.all([
+      const [appRes, invRes] = await Promise.all([
         apiClient.get('/admin/all-appointments'),
-        apiClient.get('/invoices'),
-        apiClient.get('/retail')
+        apiClient.get('/invoices')
       ]);
       setAppointments(appRes.data.result || appRes.data);
-      
-      const medicalInvoices = (invRes.data.result || invRes.data).map((i: any) => ({ ...i, type: 'MEDICAL' }));
-      const retailInvoices = (retailRes.data.result || retailRes.data).map((i: any) => ({
-        id: i.id,
-        appointmentId: undefined,
-        patientName: i.customerName || 'Khách mua lẻ',
-        doctorName: 'Bán lẻ tại quầy',
-        consultationFee: 0,
-        serviceFee: 0,
-        medicineFee: i.totalAmount,
-        totalAmount: i.totalAmount,
-        status: i.status,
-        paymentMethod: i.paymentMethod,
-        createdAt: i.createdAt,
-        paidAt: i.saleDate,
-        type: 'RETAIL'
-      }));
-      setInvoices([...medicalInvoices, ...retailInvoices]);
+      setInvoices(invRes.data.result || invRes.data);
     } catch (error) {
-      console.error('Lỗi tải dữ liệu thu ngân:', error);
+      console.error('Lỗi tải dữ liệu chờ thu ngân:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fetchHistoryData = async () => {
+    setIsLoading(true);
+    try {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+      });
+      if (searchTerm) queryParams.append('search', searchTerm);
+      if (filterType !== 'ALL') queryParams.append('type', filterType);
+      if (filterPayment !== 'ALL') queryParams.append('method', filterPayment);
+
+      const res = await apiClient.get(`/invoices/history?${queryParams.toString()}`);
+      const pageData = res.data.result || res.data;
+      setPaidInvoices(pageData.content || []);
+      setTotalPages(pageData.totalPages || 0);
+    } catch (error) {
+      console.error('Lỗi tải lịch sử thu ngân:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleGenerateInvoice = async (appointmentId: number) => {
     try {
       await apiClient.post(`/invoices/generate/${appointmentId}`);
@@ -428,7 +445,7 @@ export default function AdminBilling() {
     }
   };
 
-  const formatMoney = (amount: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  const formatMoney = (amount?: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 
   // --- TÍNH NĂNG IN HÓA ĐƠN ---
   const handlePrintInvoice = (inv: Invoice) => {
@@ -522,20 +539,9 @@ export default function AdminBilling() {
   );
 
   const unpaidInvoices = invoices.filter(i => 
-    i.type === 'MEDICAL' && i.status === 'UNPAID' && i.patientName.toLowerCase().includes(searchTerm.toLowerCase())
+    i.type === 'MEDICAL' && i.status === 'UNPAID' && 
+    (i.patientName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const paidInvoices = invoices.filter(i => {
-    if (i.status !== 'PAID') return false;
-    const displayId = i.type === 'RETAIL' ? `RET-${i.id}` : `INV-${i.id}`;
-    if (!i.patientName.toLowerCase().includes(searchTerm.toLowerCase()) && !displayId.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    if (filterType !== 'ALL' && i.type !== filterType) return false;
-    if (filterPayment !== 'ALL') {
-      if (filterPayment === 'TRANSFER' && (i.paymentMethod !== 'TRANSFER' && i.paymentMethod !== 'VNPAY')) return false;
-      if (filterPayment === 'CASH' && i.paymentMethod !== 'CASH') return false;
-    }
-    return true;
-  }).sort((a, b) => b.id - a.id);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -676,10 +682,35 @@ export default function AdminBilling() {
                       </button>
                     )}
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                ))}
             </tbody>
           </table>
+          
+          {/* Phân trang */}
+          {activeTab === 'PAID' && totalPages > 1 && (
+            <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+              <span className="text-sm text-gray-500">
+                Trang {page + 1} / {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <button 
+                  disabled={page === 0} 
+                  onClick={() => setPage(p => p - 1)}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition text-sm font-medium"
+                >
+                  Trước
+                </button>
+                <button 
+                  disabled={page >= totalPages - 1} 
+                  onClick={() => setPage(p => p + 1)}
+                  className="px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition text-sm font-medium"
+                >
+                  Sau
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
