@@ -24,11 +24,17 @@ interface MedicalService { id: number; name: string; category: string; price: nu
 
 export default function DoctorPortalPage() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
-  
+  const [activeTab, setActiveTab] = useState(() => {
+    return localStorage.getItem('doctorActiveTab') || 'dashboard';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('doctorActiveTab', activeTab);
+  }, [activeTab]);
+
   // Dữ liệu chung
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [services, setServices] = useState<MedicalService[]>([]); 
+  const [services, setServices] = useState<MedicalService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Quản lý Modal
@@ -52,7 +58,7 @@ export default function DoctorPortalPage() {
     try {
       const res = await apiClient.get('/doctor/appointments');
       setAppointments((res.data.result || res.data).sort((a: any, b: any) => b.id - a.id));
-    } catch (error) { console.error('Lỗi tải lịch hẹn:', error); } 
+    } catch (error) { console.error('Lỗi tải lịch hẹn:', error); }
     finally { setIsLoading(false); }
   };
 
@@ -100,43 +106,42 @@ export default function DoctorPortalPage() {
             </button>
           </nav>
         </div>
+        <div className="p-4 border-t border-gray-100 space-y-2 shrink-0">
+          <button onClick={() => navigate('/profile')} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-blue-600 hover:bg-blue-50 rounded-xl transition"><User className="w-5 h-5 mr-2" /> Hồ sơ cá nhân</button>
+          <button onClick={handleLogout} className="w-full flex items-center justify-center px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition"><LogOut className="w-5 h-5 mr-2" /> Đăng xuất</button>
+        </div>
       </aside>
 
       {/* KHU VỰC NỘI DUNG CHÍNH (ROUTER) */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className="h-16 shrink-0 bg-white border-b border-gray-200 flex items-center justify-between px-8 shadow-sm relative z-0">
-          <h1 className="text-xl font-bold text-gray-800">
-            {activeTab === 'dashboard' ? 'Bàn làm việc Bác sĩ' : 'Quản lý Ca khám'}
-          </h1>
-        </header>
-        
+
         <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           {activeTab === 'dashboard' && (
-             <DoctorDashboard 
-                appointments={appointments} 
-                isLoading={isLoading} 
-                onConfirm={handleConfirmAppointment} 
-                onOpenModal={handleOpenRecordModal} 
-             />
+            <DoctorDashboard
+              appointments={appointments}
+              isLoading={isLoading}
+              onConfirm={handleConfirmAppointment}
+              onOpenModal={handleOpenRecordModal}
+            />
           )}
           {activeTab === 'appointments' && (
-             <DoctorAppointments 
-                appointments={appointments} 
-                isLoading={isLoading} 
-                onConfirm={handleConfirmAppointment} 
-                onOpenModal={handleOpenRecordModal} 
-             />
+            <DoctorAppointments
+              appointments={appointments}
+              isLoading={isLoading}
+              onConfirm={handleConfirmAppointment}
+              onOpenModal={handleOpenRecordModal}
+            />
           )}
         </main>
       </div>
 
       {/* POPUP BỆNH ÁN HIỂN THỊ KHI ĐƯỢC GỌI */}
       {isRecordModalOpen && selectedAppt && (
-        <MedicalRecordModal 
-           appointment={selectedAppt} 
-           services={services} 
-           onClose={() => setIsRecordModalOpen(false)} 
-           onSuccess={handleRecordSuccess} 
+        <MedicalRecordModal
+          appointment={selectedAppt}
+          services={services}
+          onClose={() => setIsRecordModalOpen(false)}
+          onSuccess={handleRecordSuccess}
         />
       )}
     </div>
