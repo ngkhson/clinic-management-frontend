@@ -25,6 +25,7 @@ apiClient.interceptors.request.use((config) => {
 interface Doctor {
   id: number;
   fullName: string;
+  specialtyId: number;
   specialtyName: string;
   degree: string;
   biography: string;
@@ -61,9 +62,6 @@ function DoctorDetailPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isBooking, setIsBooking] = useState(false);
   const [error, setError] = useState<string>('');
-  
-  // Trạng thái modal Thanh toán
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -99,8 +97,7 @@ function DoctorDetailPageContent() {
     fetchSchedules();
   }, [id, selectedDate]);
 
-  // BƯỚC 1: Hiện bảng chọn phương thức thanh toán
-  const handleProceedToPayment = () => {
+  const executeBooking = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Vui lòng đăng nhập để đặt lịch khám!');
@@ -111,51 +108,30 @@ function DoctorDetailPageContent() {
       setError('Vui lòng chọn khung giờ khám!');
       return;
     }
-    setError('');
-    setShowPaymentOptions(true);
-  };
-
-  // BƯỚC 2: Gọi API lưu lịch hẹn và nhận URL thanh toán thật
-  const executeBooking = async (paymentType: 'PAY_LATER' | 'PAY_NOW') => {
+    
     setIsBooking(true);
+    setError('');
+    
     try {
-      // Gọi API đặt lịch, gửi kèm phương thức thanh toán để Backend xử lý
-      const response = await apiClient.post('/appointments', {
-        doctorId: parseInt(id || '1'),
-        scheduleId: selectedScheduleId,
-        symptoms: symptoms,
-        paymentType: paymentType // 'PAY_NOW' hoặc 'PAY_LATER'
+      const schedule = schedules.find(s => s.id === selectedScheduleId);
+      if (!schedule || !doctor) return;
+
+      await apiClient.post('/appointments', {
+        specialtyId: doctor.specialtyId,
+        appointmentDate: selectedDate,
+        timeSlot: schedule.timeSlot,
+        symptoms: symptoms
       });
 
-      if (paymentType === 'PAY_NOW') {
-        // KIỂM TRA: Nếu Backend trả về URL thanh toán (Ví dụ từ VNPAY)
-        if (response.data && response.data.paymentUrl) {
-          // Điều hướng người dùng sang trang thanh toán của VNPAY/Ngân hàng
-          window.location.href = response.data.paymentUrl;
-        } else {
-          // Fallback hiển thị nếu Backend chưa tích hợp xong phần trả URL
-          alert('Đang chờ hệ thống tạo link thanh toán...');
-          setTimeout(() => {
-            setSuccess(true);
-            setShowPaymentOptions(false);
-          }, 1500);
-        }
-      } else {
-        // Thanh toán sau tại quầy
-        setSuccess(true);
-        setShowPaymentOptions(false);
-      }
-      
+      setSuccess(true);
     } catch (err: any) {
       if (err.response && err.response.status === 400) {
         const responseData = err.response.data;
         const errorMessage = typeof responseData === 'string' 
           ? responseData : (responseData?.message || 'Ca khám này đã đầy.');
         setError(errorMessage);
-        setShowPaymentOptions(false);
       } else {
         setError('Có lỗi xảy ra khi đặt lịch.');
-        setShowPaymentOptions(false);
       }
     } finally {
       setIsBooking(false);
@@ -235,11 +211,11 @@ function DoctorDetailPageContent() {
 
                   <div className="mt-auto">
                     <button
-                      onClick={handleProceedToPayment}
-                      disabled={!selectedScheduleId}
-                      className={`w-full flex items-center justify-center py-4 px-6 rounded-2xl text-white font-bold text-lg transition-all ${!selectedScheduleId ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/40'}`}
+                      onClick={executeBooking}
+                      disabled={!selectedScheduleId || isBooking}
+                      className={`w-full flex items-center justify-center py-4 px-6 rounded-2xl text-white font-bold text-lg transition-all ${(!selectedScheduleId || isBooking) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/40'}`}
                     >
-                      Xác nhận đặt khám <ArrowRight className="w-5 h-5 ml-2" />
+                      {isBooking ? 'Đang xử lý...' : 'Xác nhận đặt khám'} <ArrowRight className="w-5 h-5 ml-2" />
                     </button>
                     {!selectedScheduleId && <p className="text-center text-xs text-gray-400 mt-3">Vui lòng chọn khung giờ trước khi đặt khám</p>}
                   </div>
@@ -249,7 +225,7 @@ function DoctorDetailPageContent() {
           ) : (
             <div className="p-16 text-center bg-green-50/30">
               <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6 ring-8 ring-green-50"><CheckCircle2 className="w-12 h-12 text-green-600" /></div>
-              <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Đặt lịch & Thanh toán thành công!</h2>
+              <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Đặt lịch thành công!</h2>
               <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">Lịch hẹn của bạn đã được ghi nhận. Bạn có thể theo dõi trong phần <strong>Hồ sơ của tôi</strong>.</p>
               <div className="flex justify-center space-x-4"><button onClick={() => navigate('/patient-dashboard')} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 transition">Xem hồ sơ khám</button><button onClick={() => navigate('/')} className="px-6 py-3 border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition">Về Trang chủ</button></div>
             </div>
@@ -258,49 +234,7 @@ function DoctorDetailPageContent() {
 
       </div>
 
-      {/* --- MODAL CHỌN PHƯƠNG THỨC THANH TOÁN --- */}
-      {showPaymentOptions && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
-             <div className="p-6 border-b border-gray-100 text-center relative">
-               <button onClick={() => setShowPaymentOptions(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition"><X className="w-5 h-5"/></button>
-               <h3 className="text-xl font-bold text-gray-900 mb-2">Thanh toán phí khám</h3>
-               <p className="text-gray-500 text-sm">Vui lòng chọn hình thức thanh toán để giữ chỗ.</p>
-             </div>
-             
-             <div className="p-6 bg-gray-50/50 space-y-4">
-               {/* Nút thanh toán Online */}
-               <button 
-                 onClick={() => executeBooking('PAY_NOW')} disabled={isBooking}
-                 className="w-full flex items-center p-4 bg-white border-2 border-blue-500 rounded-2xl hover:bg-blue-50 transition-colors group text-left"
-               >
-                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <ShieldCheck className="w-6 h-6 text-blue-600" />
-                 </div>
-                 <div className="flex-1">
-                   <h4 className="font-bold text-blue-700 text-lg">Thanh toán trực tuyến</h4>
-                   <p className="text-sm text-gray-500 mt-1">Qua VNPAY, MoMo, Thẻ tín dụng/ATM</p>
-                 </div>
-                 <ArrowRight className="w-5 h-5 text-blue-400 group-hover:text-blue-600 transition-colors" />
-               </button>
 
-               {/* Nút thanh toán tại quầy */}
-               <button 
-                 onClick={() => executeBooking('PAY_LATER')} disabled={isBooking}
-                 className="w-full flex items-center p-4 bg-white border-2 border-gray-200 rounded-2xl hover:border-gray-400 transition-colors group text-left"
-               >
-                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                    <Clock className="w-6 h-6 text-gray-600" />
-                 </div>
-                 <div className="flex-1">
-                   <h4 className="font-bold text-gray-700 text-lg">Thanh toán tại quầy</h4>
-                   <p className="text-sm text-gray-500 mt-1">Đến phòng khám thanh toán sau</p>
-                 </div>
-               </button>
-             </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
