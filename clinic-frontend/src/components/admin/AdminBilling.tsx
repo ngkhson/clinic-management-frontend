@@ -286,7 +286,7 @@ apiClient.interceptors.request.use((config: any) => {
   return config;
 });
 
-interface Invoice { id: number; appointmentId: number; patientName: string; doctorName: string; consultationFee: number; serviceFee: number; medicineFee: number; totalAmount: number; status: string; paymentMethod: string; createdAt: string; paidAt: string; }
+interface Invoice { id: number; appointmentId?: number; patientName: string; doctorName?: string; consultationFee?: number; serviceFee?: number; medicineFee?: number; totalAmount: number; status: string; paymentMethod: string; createdAt: string; paidAt: string; type?: 'MEDICAL' | 'RETAIL'; }
 interface Appointment { id: number; patientName: string; doctorName: string; status: string; appointmentDate: string; timeSlot: string; }
 
 export default function AdminBilling() {
@@ -312,12 +312,30 @@ export default function AdminBilling() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [appRes, invRes] = await Promise.all([
+      const [appRes, invRes, retailRes] = await Promise.all([
         apiClient.get('/admin/all-appointments'),
-        apiClient.get('/invoices')
+        apiClient.get('/invoices'),
+        apiClient.get('/retail')
       ]);
       setAppointments(appRes.data.result || appRes.data);
-      setInvoices(invRes.data.result || invRes.data);
+      
+      const medicalInvoices = (invRes.data.result || invRes.data).map((i: any) => ({ ...i, type: 'MEDICAL' }));
+      const retailInvoices = (retailRes.data.result || retailRes.data).map((i: any) => ({
+        id: i.id,
+        appointmentId: undefined,
+        patientName: i.customerName || 'Khách mua lẻ',
+        doctorName: 'Bán lẻ tại quầy',
+        consultationFee: 0,
+        serviceFee: 0,
+        medicineFee: i.totalAmount,
+        totalAmount: i.totalAmount,
+        status: i.status,
+        paymentMethod: i.paymentMethod,
+        createdAt: i.createdAt,
+        paidAt: i.saleDate,
+        type: 'RETAIL'
+      }));
+      setInvoices([...medicalInvoices, ...retailInvoices]);
     } catch (error) {
       console.error('Lỗi tải dữ liệu thu ngân:', error);
     } finally {
@@ -497,7 +515,7 @@ export default function AdminBilling() {
 
   // --- LỌC DỮ LIỆU ---
   const unbilledAppointments = appointments.filter(a => 
-    a.status === 'COMPLETED' && !invoices.find(i => i.appointmentId === a.id) &&
+    a.status === 'COMPLETED' && !invoices.find(i => i.type === 'MEDICAL' && i.appointmentId === a.id) &&
     a.patientName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -617,7 +635,7 @@ export default function AdminBilling() {
               {paidInvoices.length === 0 ? <tr><td colSpan={6} className="p-8 text-center text-gray-500">Chưa có lịch sử thu tiền.</td></tr> : 
                paidInvoices.map((inv) => (
                 <tr key={inv.id} className="hover:bg-gray-50 transition">
-                  <td className="p-4 text-gray-400 font-medium">#{inv.id}</td>
+                  <td className="p-4 text-gray-400 font-medium">#{inv.id} {inv.type === 'RETAIL' && <span className="ml-1 text-[10px] bg-teal-100 text-teal-700 px-1 py-0.5 rounded">BÁN LẺ</span>}</td>
                   <td className="p-4 font-bold text-gray-900">{inv.patientName}</td>
                   <td className="p-4 text-right font-black text-green-600">{formatMoney(inv.totalAmount)}</td>
                   <td className="p-4 text-center">
@@ -625,9 +643,11 @@ export default function AdminBilling() {
                   </td>
                   <td className="p-4 text-center text-sm text-gray-600">{inv.paidAt ? new Date(inv.paidAt).toLocaleString('vi-VN') : '---'}</td>
                   <td className="p-4 text-center">
-                    <button onClick={() => handlePrintInvoice(inv)} className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-sm font-bold transition">
-                      <Printer className="w-4 h-4 mr-1.5" /> In phiếu
-                    </button>
+                    {inv.type === 'MEDICAL' && (
+                      <button onClick={() => handlePrintInvoice(inv)} className="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-sm font-bold transition">
+                        <Printer className="w-4 h-4 mr-1.5" /> In phiếu
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
