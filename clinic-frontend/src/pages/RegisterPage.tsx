@@ -41,6 +41,7 @@ export default function RegisterPage() {
       // Lưu Token và Email vào LocalStorage
       localStorage.setItem('token', token);
       localStorage.setItem('userEmail', formData.email);
+      localStorage.setItem('role', 'PATIENT'); // Đăng ký mặc định là bệnh nhân
 
       // Chuyển hướng về Trang chủ
       navigate('/');

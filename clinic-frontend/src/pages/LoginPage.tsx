@@ -24,7 +24,8 @@ export default function LoginPage() {
       // Lấy token và role từ backend trả về
       const result = response.data.result || response.data;
       const token = result.token;
-      const role = result.role; // LẤY ROLE TỪ API
+      // Backend trả về mảng roles, lấy phần tử đầu tiên
+      const role = result.roles && result.roles.length > 0 ? result.roles[0] : 'PATIENT';
 
       // Lưu vào LocalStorage
       localStorage.setItem('token', token);
