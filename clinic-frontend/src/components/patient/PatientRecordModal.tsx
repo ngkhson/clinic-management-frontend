@@ -9,6 +9,14 @@ export interface MedicalRecord {
   prescription: string;
   notes: string;
   serviceNames?: string[];
+  // THÊM MỚI: Nhận danh sách đơn thuốc từ hệ thống
+  prescriptionDetails?: {
+    id: number;
+    medicineName: string;
+    unit: string;
+    quantity: number;
+    dosageInstruction: string;
+  }[];
   createdAt?: string;
 }
 
@@ -19,7 +27,11 @@ interface Props {
   onClose: () => void;
 }
 
-export default function PatientRecordModal({ isOpen, record, isLoading, onClose }: Props) {
+export default function PatientRecordModal({
+  isOpen, record, isLoading, onClose
+}: {
+  isOpen: boolean, record: MedicalRecord | null, isLoading: boolean, onClose: () => void
+}) {
   if (!isOpen) return null;
 
   const handlePrint = () => {
@@ -28,8 +40,8 @@ export default function PatientRecordModal({ isOpen, record, isLoading, onClose 
     if (!printWindow) { alert("Vui lòng cho phép popup để in đơn thuốc."); return; }
 
     const patientName = record.patientName || 'Bệnh nhân';
-    const dateFormatted = record.createdAt 
-      ? new Date(record.createdAt).toLocaleDateString('vi-VN') 
+    const dateFormatted = record.createdAt
+      ? new Date(record.createdAt).toLocaleDateString('vi-VN')
       : new Date().toLocaleDateString('vi-VN');
 
     const htmlContent = `
@@ -69,13 +81,35 @@ export default function PatientRecordModal({ isOpen, record, isLoading, onClose 
         
         <div class="section-title">3. Chỉ định Cận lâm sàng:</div>
         <div class="content-box">
-          ${record.serviceNames && record.serviceNames.length > 0 
-            ? '<ul style="margin: 0; padding-left: 20px;">' + record.serviceNames.map(s => `<li>${s}</li>`).join('') + '</ul>' 
-            : 'Không có chỉ định.'}
+          ${record.serviceNames && record.serviceNames.length > 0
+        ? '<ul style="margin: 0; padding-left: 20px;">' + record.serviceNames.map(s => `<li>${s}</li>`).join('') + '</ul>'
+        : 'Không có chỉ định.'}
         </div>
 
         <div class="section-title">4. Chỉ định dùng thuốc (Kê toa):</div>
-        <div class="prescription-box"><pre style="font-family: inherit; margin: 0; white-space: pre-wrap; font-size: 16px; line-height: 1.8;">${record.prescription}</pre></div>
+        ${record.prescriptionDetails && record.prescriptionDetails.length > 0 ? `
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 15px;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left;">Tên thuốc</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: center;">SL</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left;">Hướng dẫn sử dụng</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${record.prescriptionDetails.map(item => `
+              <tr>
+                <td style="border: 1px solid #000; padding: 8px;"><strong>${item.medicineName}</strong></td>
+                <td style="border: 1px solid #000; padding: 8px; text-align: center;">${item.quantity} ${item.unit}</td>
+                <td style="border: 1px solid #000; padding: 8px;">${item.dosageInstruction}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        ` : ''}
+        ${record.prescription ? `<div class="prescription-box"><pre style="font-family: inherit; margin: 0; white-space: pre-wrap; font-size: 16px; line-height: 1.8;">${record.prescription}</pre></div>` : ''}
+        ${!record.prescription && (!record.prescriptionDetails || record.prescriptionDetails.length === 0) ? '<div class="content-box"><i>Không có chỉ định dùng thuốc.</i></div>' : ''}
+        
         <div class="section-title">5. Lời dặn của Bác sĩ:</div>
         <div class="content-box"><i>${record.notes || 'Không có chỉ định thêm.'}</i></div>
         
@@ -108,7 +142,7 @@ export default function PatientRecordModal({ isOpen, record, isLoading, onClose 
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <div className="p-6 overflow-y-auto bg-gray-50/30">
           {isLoading ? (
             <div className="py-12 text-center text-gray-500">Đang tải hồ sơ...</div>
@@ -126,9 +160,39 @@ export default function PatientRecordModal({ isOpen, record, isLoading, onClose 
                 <h4 className="text-sm font-bold text-blue-800 uppercase tracking-wider mb-3 flex items-center relative z-10">
                   <Pill className="w-4 h-4 mr-2 text-blue-600" /> Đơn thuốc (Kê toa)
                 </h4>
-                <div className="whitespace-pre-line text-gray-800 font-medium leading-relaxed bg-white/70 p-5 rounded-xl border border-blue-50 relative z-10">
-                  {record.prescription}
-                </div>
+
+                {record.prescriptionDetails && record.prescriptionDetails.length > 0 && (
+                  <div className="bg-white rounded-xl border border-blue-100 overflow-hidden mb-4 relative z-10 shadow-sm">
+                    <table className="w-full text-left">
+                      <thead className="bg-blue-50 text-blue-800 text-xs uppercase">
+                        <tr>
+                          <th className="p-3 font-bold">Tên thuốc</th>
+                          <th className="p-3 font-bold text-center">SL</th>
+                          <th className="p-3 font-bold">Hướng dẫn sử dụng</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50">
+                        {record.prescriptionDetails.map(item => (
+                          <tr key={item.id}>
+                            <td className="p-3 font-bold text-gray-800 text-sm">{item.medicineName}</td>
+                            <td className="p-3 text-center text-sm font-medium text-blue-600">{item.quantity} {item.unit}</td>
+                            <td className="p-3 text-sm text-gray-600">{item.dosageInstruction}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {record.prescription && (
+                  <div className="whitespace-pre-line text-gray-800 font-medium leading-relaxed bg-white/70 p-5 rounded-xl border border-blue-50 relative z-10">
+                    {record.prescription}
+                  </div>
+                )}
+
+                {!record.prescription && (!record.prescriptionDetails || record.prescriptionDetails.length === 0) && (
+                  <p className="text-gray-500 italic relative z-10">Không có đơn thuốc.</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -162,7 +226,7 @@ export default function PatientRecordModal({ isOpen, record, isLoading, onClose 
         </div>
 
         <div className="p-4 border-t border-gray-100 bg-white flex justify-end space-x-3">
-          <button 
+          <button
             onClick={handlePrint}
             disabled={!record}
             className={`flex items-center px-6 py-2.5 rounded-xl font-bold transition-all ${record ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}

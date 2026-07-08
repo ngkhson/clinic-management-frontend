@@ -20,6 +20,7 @@ export default function DoctorDashboard({ appointments, isLoading, onConfirm, on
     switch (status) {
       case 'PENDING': return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold border border-yellow-200">Chờ xác nhận</span>;
       case 'CONFIRMED': return <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold border border-blue-200">Sắp khám</span>;
+      case 'EXAMINING': return <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold border border-purple-200">Chờ KQ CLS</span>;
       case 'COMPLETED': return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold border border-green-200">Đã xong</span>;
       default: return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-bold">{status}</span>;
     }
@@ -85,6 +86,7 @@ export default function DoctorDashboard({ appointments, isLoading, onConfirm, on
                   <td className="p-4 text-center">
                     {app.status === 'PENDING' && <button onClick={() => onConfirm(app.id)} className="px-4 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-bold">Nhận ca</button>}
                     {app.status === 'CONFIRMED' && <button onClick={() => onOpenModal(app)} className="px-4 py-1.5 bg-green-600 text-white hover:bg-green-700 rounded-lg text-sm font-bold shadow-sm">Khám & Chỉ định</button>}
+                    {app.status === 'EXAMINING' && <button onClick={() => onOpenModal(app)} className="px-4 py-1.5 bg-yellow-500 text-white hover:bg-yellow-600 rounded-lg text-sm font-bold shadow-sm">Tiếp tục khám</button>}
                     {app.status === 'COMPLETED' && <span className="text-gray-400 text-sm">Hoàn thành</span>}
                   </td>
                 </tr>

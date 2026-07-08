@@ -11,7 +11,9 @@ import {
   Calendar, 
   UserRound, 
   LogOut, 
-  Stethoscope 
+  Stethoscope,
+  Receipt,
+  Pill // THÊM ICON KHO DƯỢC
 } from 'lucide-react';
 
 // Import các component con đã tách
@@ -23,6 +25,8 @@ import MedicalServiceManager from '../components/admin/MedicalServiceManager';
 import AdminDoctors from '../components/admin/AdminDoctors';
 import AdminPatients from '../components/admin/AdminPatients';
 import AdminSchedules from '../components/admin/AdminSchedules';
+import AdminBilling from '../components/admin/AdminBilling';
+import AdminMedicinePage from './AdminMedicinePage'; // IMPORT KHO DƯỢC
 
 export default function AdminPortalPage() {
   const navigate = useNavigate();
@@ -74,6 +78,15 @@ export default function AdminPortalPage() {
             <button onClick={() => setActiveTab('schedules')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'schedules' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}>
               <Calendar className="w-5 h-5 mr-3" /> Lịch làm việc
             </button>
+            
+            {/* THÊM TAB KHO DƯỢC */}
+            <button onClick={() => setActiveTab('medicine')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'medicine' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}>
+              <Pill className="w-5 h-5 mr-3" /> Kho Dược & Vật tư
+            </button>
+
+            <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'billing' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-600 hover:bg-gray-50 hover:text-blue-600'}`}>
+              <Receipt className="w-5 h-5 mr-3" /> Thu ngân & Hóa đơn
+            </button>
           </nav>
         </div>
         
@@ -99,6 +112,8 @@ export default function AdminPortalPage() {
             {activeTab === 'doctors' && 'Hồ sơ Đội ngũ Bác sĩ'}
             {activeTab === 'patients' && 'Quản lý Bệnh nhân'}
             {activeTab === 'schedules' && 'Phân bổ Lịch làm việc'}
+            {activeTab === 'medicine' && 'Quản trị Kho Dược phẩm'} {/* TIÊU ĐỀ KHO DƯỢC */}
+            {activeTab === 'billing' && 'Thu ngân & Viện phí'}
           </h1>
           <div className="flex items-center">
             <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 border border-blue-200 flex items-center justify-center font-bold text-sm">AD</div>
@@ -118,6 +133,14 @@ export default function AdminPortalPage() {
           {activeTab === 'doctors' && <AdminDoctors />}
           {activeTab === 'patients' && <AdminPatients />}
           {activeTab === 'schedules' && <AdminSchedules />}
+          {/* RENDER COMPONENT KHO DƯỢC TẠI ĐÂY */}
+          {activeTab === 'medicine' && (
+             <div className="-m-4 md:-m-8 h-full"> 
+               {/* Reset margin để AdminMedicinePage tự bung full width */}
+               <AdminMedicinePage />
+             </div>
+          )}
+          {activeTab === 'billing' && <AdminBilling />}
         </main>
       </div>
     </div>

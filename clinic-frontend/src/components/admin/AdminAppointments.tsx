@@ -35,6 +35,17 @@ export default function AdminAppointments() {
     fetchAllAppointments();
   }, []);
 
+  // THÊM HÀM XỬ LÝ XÁC NHẬN
+  const handleConfirm = async (id: number) => {
+    try {
+      await apiClient.put(`/admin/appointments/${id}/status?status=CONFIRMED`);
+      // Cập nhật lại state cục bộ cho nhanh
+      setAllAppointments(prev => prev.map(app => app.id === id ? {...app, status: 'CONFIRMED'} : app));
+    } catch (error) {
+      alert('Có lỗi xảy ra khi xác nhận lịch hẹn!');
+    }
+  };
+
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING': return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium border border-yellow-200">Chờ xác nhận</span>;
@@ -56,6 +67,7 @@ export default function AdminAppointments() {
               <th className="p-4 font-semibold">Bác sĩ phụ trách</th>
               <th className="p-4 font-semibold">Thời gian hẹn</th>
               <th className="p-4 font-semibold">Trạng thái</th>
+              <th className="p-4 font-semibold text-center">Hành động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -68,6 +80,13 @@ export default function AdminAppointments() {
                 <td className="p-4 text-blue-600 font-medium">BS. {app.doctorName}</td>
                 <td className="p-4 text-gray-600"><span className="bg-gray-100 px-2 py-1 rounded text-xs mr-2 font-medium">{app.timeSlot}</span> {app.appointmentDate}</td>
                 <td className="p-4">{renderStatusBadge(app.status)}</td>
+                <td className="p-4 text-center">
+                  {app.status === 'PENDING' && (
+                    <button onClick={() => handleConfirm(app.id)} className="px-4 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-bold transition">
+                      Xác nhận Lịch
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Plus, Edit, Trash2, CheckCircle, XCircle, X, TestTube } from 'lucide-react';
+import { Plus, Edit, Trash2, CheckCircle, XCircle, X, TestTube } from 'lucide-react';
 import axios from 'axios';
 
 const apiClient = axios.create({
@@ -34,7 +34,17 @@ export default function MedicalServiceManager() {
     price: 0
   });
 
-  const categories = ['KHÁM BỆNH', 'XÉT NGHIỆM', 'SIÊU ÂM', 'X QUANG', 'NỘI SOI', 'THỦ THUẬT'];
+  // ĐÃ CẬP NHẬT: Danh sách các nhóm dịch vụ chuẩn y khoa
+  const categories = [
+    'KHÁM BỆNH', 
+    'XÉT NGHIỆM', 
+    'X-QUANG', 
+    'SIÊU ÂM', 
+    'ĐIỆN TIM', 
+    'ĐIỆN NÃO', 
+    'NỘI SOI', 
+    'THỦ THUẬT'
+  ];
 
   useEffect(() => {
     fetchServices();
@@ -43,10 +53,8 @@ export default function MedicalServiceManager() {
   const fetchServices = async () => {
     setIsLoading(true);
     try {
-      // Vì API getAllActiveServices đang trả về tất cả service active, 
-      // nếu muốn Admin thấy cả dịch vụ tạm ngưng thì ở Backend sau này ta nâng cấp thêm.
-      // Tạm thời lấy danh sách hiện tại.
-      const res = await apiClient.get('/services');
+      // ĐÃ FIX LỖI: Gọi API /services/all để lấy cả dịch vụ đã ẩn (isActive = false)
+      const res = await apiClient.get('/services/all');
       setServices(res.data);
     } catch (error) {
       console.error('Lỗi tải danh sách dịch vụ:', error);
@@ -139,7 +147,9 @@ export default function MedicalServiceManager() {
                 </td>
                 <td className="p-4 text-center space-x-2">
                   <button onClick={() => openEditModal(srv)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Sửa"><Edit className="w-4 h-4" /></button>
-                  <button onClick={() => toggleStatus(srv.id)} className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition" title="Đổi trạng thái"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => toggleStatus(srv.id)} className={`p-2 rounded-lg transition ${srv.isActive ? 'text-red-600 hover:bg-red-100' : 'text-green-600 hover:bg-green-100'}`} title="Đổi trạng thái">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -149,7 +159,7 @@ export default function MedicalServiceManager() {
 
       {/* MODAL THÊM / SỬA */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-fade-in">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
               <h3 className="font-bold text-lg text-gray-800 flex items-center">
@@ -161,7 +171,7 @@ export default function MedicalServiceManager() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tên dịch vụ <span className="text-red-500">*</span></label>
-                <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: Siêu âm ổ bụng tổng quát" />
+                <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="VD: Điện tâm đồ (ECG)" />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
