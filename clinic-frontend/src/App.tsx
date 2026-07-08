@@ -13,6 +13,8 @@ import ChatWidget from './components/ChatWidget';
 import DoctorListPage from './pages/DoctorListPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import AdminMedicinePage from './pages/AdminMedicinePage';
+import PaymentResultPage from './pages/PaymentResultPage';
 
 // Một component trang chủ tạm thời để test sau khi đăng nhập thành công
 // const TemporaryHomePage = () => {
@@ -69,6 +71,8 @@ function App() {
         <Route path="/doctors" element={<DoctorListPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/admin/medicines" element={<AdminMedicinePage />} />
+        <Route path="/payment-result" element={<PaymentResultPage />} />
       </Routes>
       <ChatWidget />
     </BrowserRouter>
