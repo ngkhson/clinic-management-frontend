@@ -47,7 +47,7 @@ export default function MedicineInventory({ onBack }: Props) {
     setIsLoading(true);
     try {
       const res = await apiClient.get('/medicines');
-      setAllMedicines(res.data);
+      setAllMedicines(res.data.result || res.data);
     } catch (error) {
       console.error('Lỗi tải danh sách thuốc:', error);
     } finally {

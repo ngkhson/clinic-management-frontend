@@ -41,7 +41,7 @@ export default function UserProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await apiClient.get('/users/profile');
-        setProfile(res.data);
+        setProfile(res.data.result || res.data);
       } catch (error) {
         console.error('Lỗi tải hồ sơ:', error);
       } finally {

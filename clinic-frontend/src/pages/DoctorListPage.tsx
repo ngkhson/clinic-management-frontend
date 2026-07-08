@@ -45,7 +45,7 @@ export default function DoctorListPage() {
   const fetchSpecialties = async () => {
     try {
       const res = await apiClient.get('/specialties');
-      setSpecialties(res.data);
+      setSpecialties(res.data.result || res.data);
     } catch (error) { console.error('Lỗi tải chuyên khoa', error); }
   };
 
@@ -53,7 +53,7 @@ export default function DoctorListPage() {
     setIsLoading(true);
     try {
       const res = await apiClient.get('/doctors');
-      setDoctors(res.data);
+      setDoctors(res.data.result || res.data);
     } catch (error) { console.error('Lỗi tải bác sĩ', error); } finally {
       setIsLoading(false);
     }

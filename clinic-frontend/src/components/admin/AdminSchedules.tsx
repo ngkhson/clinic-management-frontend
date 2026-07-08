@@ -27,7 +27,7 @@ export default function AdminSchedules() {
 
   useEffect(() => {
     const fetchDoctors = async () => {
-      try { const res = await apiClient.get('/admin/doctors'); setDoctors(res.data); } catch (e) { console.error(e); }
+      try { const res = await apiClient.get('/admin/doctors'); setDoctors(res.data.result || res.data); } catch (e) { console.error(e); }
     };
     fetchDoctors();
   }, []);
@@ -41,7 +41,7 @@ export default function AdminSchedules() {
     setIsLoading(true);
     try {
       const res = await apiClient.get(`/schedules/doctor/${selectedDocId}?date=${selectedDate}`);
-      setExistingSchedules(res.data);
+      setExistingSchedules(res.data.result || res.data);
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 

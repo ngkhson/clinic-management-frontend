@@ -51,7 +51,7 @@ export default function DoctorPortalPage() {
     setIsLoading(true);
     try {
       const res = await apiClient.get('/doctor/appointments');
-      setAppointments(res.data.sort((a: any, b: any) => b.id - a.id));
+      setAppointments((res.data.result || res.data).sort((a: any, b: any) => b.id - a.id));
     } catch (error) { console.error('Lỗi tải lịch hẹn:', error); } 
     finally { setIsLoading(false); }
   };
@@ -59,7 +59,7 @@ export default function DoctorPortalPage() {
   const fetchServices = async () => {
     try {
       const res = await apiClient.get('/services');
-      setServices(res.data);
+      setServices(res.data.result || res.data);
     } catch (error) { console.error('Lỗi tải dịch vụ:', error); }
   };
 

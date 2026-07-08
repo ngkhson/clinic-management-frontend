@@ -28,8 +28,8 @@ export default function AdminDashboard({ onNavigate }: { onNavigate: (tab: strin
           apiClient.get('/admin/stats'),
           apiClient.get('/admin/all-appointments')
         ]);
-        setStats(statsRes.data);
-        const sorted = appRes.data.sort((a: any, b: any) => b.id - a.id);
+        setStats(statsRes.data.result || statsRes.data);
+        const sorted = (appRes.data.result || appRes.data).sort((a: any, b: any) => b.id - a.id);
         setAllAppointments(sorted);
       } catch (e) {
         console.error(e);

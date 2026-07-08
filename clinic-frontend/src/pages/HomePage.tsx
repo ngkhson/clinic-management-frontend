@@ -36,9 +36,12 @@ export default function HomePage() {
           apiClient.get('/admin/doctors') // Dùng tạm API này, nhớ cấu hình permitAll() bên Spring Security
         ]);
         
-        setSpecialties(specsRes.data);
+        const specs = specsRes.data.result || specsRes.data || [];
+        const docs = docsRes.data.result || docsRes.data || [];
+        
+        setSpecialties(specs);
         // Chỉ lấy 4 bác sĩ nổi bật nhất để hiển thị ở trang chủ
-        setDoctors(docsRes.data.slice(0, 4)); 
+        setDoctors(docs.slice(0, 4)); 
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu trang chủ:', error);
       } finally {

@@ -24,7 +24,7 @@ export default function AdminAppointments() {
       setIsLoading(true);
       try {
         const res = await apiClient.get('/admin/all-appointments');
-        const sorted = res.data.sort((a: any, b: any) => b.id - a.id);
+        const sorted = (res.data.result || res.data).sort((a: any, b: any) => b.id - a.id);
         setAllAppointments(sorted);
       } catch (e) {
         console.error(e);

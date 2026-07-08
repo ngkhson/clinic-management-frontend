@@ -61,23 +61,23 @@ export default function AdminReception() {
           apiClient.get('/admin/doctors'),
           apiClient.get('/admin/all-appointments')
         ]);
-        setSpecialties(specRes.data);
-        setDoctors(docRes.data);
-        setAllAppointments(apptRes.data);
+        setSpecialties(specRes.data.result || specRes.data);
+        setDoctors(docRes.data.result || docRes.data);
+        setAllAppointments(apptRes.data.result || apptRes.data);
       } catch (error) { console.error('Lỗi tải dữ liệu ban đầu', error); }
     };
     fetchInitialData();
   }, []);
 
   const fetchPatientsList = async () => {
-    try { const patRes = await apiClient.get('/admin/patients'); setPatients(patRes.data); } 
+    try { const patRes = await apiClient.get('/admin/patients'); setPatients(patRes.data.result || patRes.data); } 
     catch (error) { console.error(error); }
   };
 
   useEffect(() => {
     if (selectedDoctor && selectedDate && !existingApptId) {
       apiClient.get(`/schedules/doctor/${selectedDoctor}?date=${selectedDate}`)
-        .then((res: any) => { setSchedules(res.data); setSelectedSchedule(''); })
+        .then((res: any) => { setSchedules(res.data.result || res.data); setSelectedSchedule(''); })
         .catch((err: any) => console.error(err));
     } else {
       setSchedules([]);
@@ -155,7 +155,7 @@ export default function AdminReception() {
       
       // Reload lại danh sách lịch hẹn để cập nhật trạng thái
       const apptRes = await apiClient.get('/admin/all-appointments');
-      setAllAppointments(apptRes.data);
+      setAllAppointments(apptRes.data.result || apptRes.data);
 
       setTimeout(() => {
         setSuccessMsg(''); setSelectedPatient(null); setExistingApptId(null); setSelectedSpecialty('');

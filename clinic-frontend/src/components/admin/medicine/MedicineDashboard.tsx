@@ -36,7 +36,7 @@ export default function MedicineDashboard({ onNavigate }: Props) {
     const fetchLowStock = async () => {
       try {
         const res = await apiClient.get('/medicines/alerts/low-stock');
-        setLowStockMedicines(res.data);
+        setLowStockMedicines(res.data.result || res.data);
       } catch (error) {
         console.error('Lỗi tải cảnh báo:', error);
       } finally {

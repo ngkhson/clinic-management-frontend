@@ -69,7 +69,7 @@ export default function Navbar() {
   const fetchNotifications = async () => {
     try {
       const response = await apiClient.get('/notifications');
-      setNotifications(response.data);
+      setNotifications(response.data.result || response.data);
     } catch (error) {
       console.error('Lỗi tải thông báo', error);
     }

@@ -49,7 +49,7 @@ export default function MedicineSuppliers({ onBack }: Props) {
     setIsLoading(true);
     try {
       const res = await apiClient.get('/suppliers');
-      setSuppliers(res.data);
+      setSuppliers(res.data.result || res.data);
     } catch (error) {
       console.error('Lỗi tải dữ liệu nhà cung cấp:', error);
     } finally {

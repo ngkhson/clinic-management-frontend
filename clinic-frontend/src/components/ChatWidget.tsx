@@ -132,7 +132,7 @@ export default function ChatWidget() {
   const fetchActiveRooms = async () => {
     try {
       const res = await apiClient.get('/chat/rooms');
-      const formattedContacts = res.data.map((room: any) => ({
+      const formattedContacts = (res.data.result || res.data).map((room: any) => ({
         email: room.patientEmail,
         name: room.patientName,
         lastMessage: room.lastMessage,
@@ -146,7 +146,7 @@ export default function ChatWidget() {
     setIsLoadingHistory(true);
     try {
       const res = await apiClient.get(`/chat/history?patientEmail=${patientEmail}`);
-      setMessages(res.data);
+      setMessages(res.data.result || res.data);
     } catch (e) { console.error("Lỗi tải lịch sử chat", e); } finally {
       setIsLoadingHistory(false);
     }

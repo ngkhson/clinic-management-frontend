@@ -27,7 +27,7 @@ export default function AdminPatients() {
     setIsLoading(true);
     try {
       const res = await apiClient.get('/admin/patients');
-      setPatients(res.data);
+      setPatients(res.data.result || res.data);
     } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 

@@ -28,7 +28,7 @@ export default function MedicineReports({ onBack }: { onBack: () => void }) {
     const fetchData = async () => {
       try {
         const res = await apiClient.get('/medicines/extra/report');
-        setData(res.data);
+        setData(res.data.result || res.data);
       } catch (error) {
         console.error('Lỗi tải báo cáo:', error);
       } finally {

@@ -33,11 +33,11 @@ export default function AdminDoctors() {
 
   const fetchDoctors = async () => {
     setIsLoading(true);
-    try { const res = await apiClient.get('/admin/doctors'); setDoctors(res.data); } catch (e) { console.error(e); } finally { setIsLoading(false); }
+    try { const res = await apiClient.get('/admin/doctors'); setDoctors(res.data.result || res.data); } catch (e) { console.error(e); } finally { setIsLoading(false); }
   };
 
   const fetchSpecialties = async () => {
-    try { const res = await apiClient.get('/specialties'); setSpecialties(res.data); } catch (e) { console.error(e); }
+    try { const res = await apiClient.get('/specialties'); setSpecialties(res.data.result || res.data); } catch (e) { console.error(e); }
   };
 
   const handleSaveDoctor = async (e: React.FormEvent) => {

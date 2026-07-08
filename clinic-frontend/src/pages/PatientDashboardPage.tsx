@@ -61,7 +61,7 @@ export default function PatientDashboardPage() {
     try {
       const res = await apiClient.get('/patient/appointments');
       // Sắp xếp ngày gần nhất & id lớn nhất lên đầu
-      const sorted = res.data.sort((a: any, b: any) => b.id - a.id);
+      const sorted = (res.data.result || res.data).sort((a: any, b: any) => b.id - a.id);
       setAppointments(sorted);
     } catch (error) {
       console.error('Lỗi tải lịch hẹn:', error);
@@ -77,7 +77,7 @@ export default function PatientDashboardPage() {
     setSelectedRecord(null);
     try {
       const res = await apiClient.get(`/patient/appointments/${id}/record`);
-      setSelectedRecord(res.data);
+      setSelectedRecord(res.data.result || res.data);
     } catch (error) {
       alert('Lịch hẹn này chưa có hồ sơ bệnh án hoặc đã xảy ra lỗi!');
       setIsRecordModalOpen(false);

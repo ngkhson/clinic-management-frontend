@@ -39,8 +39,8 @@ export default function MedicineImport({ onBack }: { onBack: () => void }) {
         apiClient.get('/suppliers/active'),
         apiClient.get('/medicines')
       ]);
-      setSuppliers(supRes.data);
-      setMedicines(medRes.data.filter((m: Medicine) => m.isActive)); // Chỉ lấy thuốc đang hoạt động
+      setSuppliers(supRes.data.result || supRes.data);
+      setMedicines((medRes.data.result || medRes.data).filter((m: Medicine) => m.isActive)); // Chỉ lấy thuốc đang hoạt động
     } catch (error) { console.error('Lỗi tải dữ liệu', error); }
   };
 

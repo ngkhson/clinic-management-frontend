@@ -40,8 +40,8 @@
 //         apiClient.get('/admin/all-appointments'),
 //         apiClient.get('/invoices')
 //       ]);
-//       setAppointments(appRes.data);
-//       setInvoices(invRes.data);
+//       setAppointments(appRes.data.result || appRes.data);
+//       setInvoices(invRes.data.result || invRes.data);
 //     } catch (error) {
 //       console.error('Lỗi tải dữ liệu thu ngân:', error);
 //     } finally {
@@ -316,8 +316,8 @@ export default function AdminBilling() {
         apiClient.get('/admin/all-appointments'),
         apiClient.get('/invoices')
       ]);
-      setAppointments(appRes.data);
-      setInvoices(invRes.data);
+      setAppointments(appRes.data.result || appRes.data);
+      setInvoices(invRes.data.result || invRes.data);
     } catch (error) {
       console.error('Lỗi tải dữ liệu thu ngân:', error);
     } finally {

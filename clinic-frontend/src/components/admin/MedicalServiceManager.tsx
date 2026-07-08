@@ -55,7 +55,7 @@ export default function MedicalServiceManager() {
     try {
       // ĐÃ FIX LỖI: Gọi API /services/all để lấy cả dịch vụ đã ẩn (isActive = false)
       const res = await apiClient.get('/services/all');
-      setServices(res.data);
+      setServices(res.data.result || res.data);
     } catch (error) {
       console.error('Lỗi tải danh sách dịch vụ:', error);
     } finally {

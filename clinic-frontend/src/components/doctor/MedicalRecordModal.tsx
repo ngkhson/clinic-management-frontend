@@ -349,7 +349,7 @@ export default function MedicalRecordModal({ appointment, services, onClose, onS
     const fetchInitialData = async () => {
       try {
         const resMed = await apiClient.get('/medicines');
-        const availableMeds = resMed.data.filter((m: Medicine) => m.isActive && m.currentQuantity > 0);
+        const availableMeds = (resMed.data.result || resMed.data).filter((m: Medicine) => m.isActive && m.currentQuantity > 0);
         setMedicines(availableMeds);
 
         if (appointment.status === 'EXAMINING') {

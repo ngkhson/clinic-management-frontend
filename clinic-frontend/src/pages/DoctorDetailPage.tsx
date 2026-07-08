@@ -73,8 +73,8 @@ function DoctorDetailPageContent() {
           apiClient.get(`/doctors/${id || 1}`),
           apiClient.get(`/reviews/doctor/${id || 1}`)
         ]);
-        setDoctor(docRes.data);
-        setReviews(reviewRes.data);
+        setDoctor(docRes.data.result || docRes.data);
+        setReviews(reviewRes.data.result || reviewRes.data);
       } catch (err) {
         setError('Không thể tải thông tin bác sĩ.');
       }
@@ -88,7 +88,7 @@ function DoctorDetailPageContent() {
       try {
         setIsLoading(true);
         const response = await apiClient.get(`/schedules/doctor/${id || 1}?date=${selectedDate}`);
-        setSchedules(response.data);
+        setSchedules(response.data.result || response.data);
         setSelectedScheduleId(null); 
       } catch (err) {
         console.error(err);
