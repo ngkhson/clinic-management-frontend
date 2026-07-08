@@ -54,7 +54,15 @@ export default function AdminSchedules() {
     if (!selectedDocId || !selectedDate || selectedSlots.length === 0) { alert('Vui lòng chọn Bác sĩ, Ngày và ít nhất 1 khung giờ!'); return; }
     setIsLoading(true);
     try {
-      await apiClient.post('/admin/schedules/generate', { doctorId: parseInt(selectedDocId), date: selectedDate, timeSlots: selectedSlots, maxPatients: 1 });
+      const formattedSlots = selectedSlots.map(slot => ({
+        timeSlot: slot,
+        maxPatients: 1
+      }));
+      await apiClient.post('/admin/schedules/generate', { 
+        doctorId: parseInt(selectedDocId), 
+        date: selectedDate, 
+        slots: formattedSlots 
+      });
       alert('Tạo lịch làm việc thành công!'); setSelectedSlots([]); fetchExistingSchedules(); 
     } catch (error) { alert('Có lỗi khi tạo lịch. Vui lòng kiểm tra lại!'); } finally { setIsLoading(false); }
   };
