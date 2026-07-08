@@ -22,6 +22,8 @@ export default function AdminSchedules() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [existingSchedules, setExistingSchedules] = useState<Schedule[]>([]);
   const defaultSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  const [customSlots, setCustomSlots] = useState<string[]>([]);
+  const [customTimeInput, setCustomTimeInput] = useState<string>('08:30');
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
   const [maxPatients, setMaxPatients] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,6 +55,16 @@ export default function AdminSchedules() {
   const toggleSlotSelection = (slot: string) => {
     if (selectedSlots.includes(slot)) setSelectedSlots(selectedSlots.filter(s => s !== slot));
     else setSelectedSlots([...selectedSlots, slot]);
+  };
+
+  const handleAddCustomSlot = () => {
+    if (customTimeInput && !defaultSlots.includes(customTimeInput) && !customSlots.includes(customTimeInput)) {
+      setCustomSlots(prev => [...prev, customTimeInput].sort());
+      // Tự động tick chọn giờ vừa thêm
+      if (!selectedSlots.includes(customTimeInput)) {
+        setSelectedSlots(prev => [...prev, customTimeInput]);
+      }
+    }
   };
 
   const handleGenerateSchedules = async () => {
@@ -99,6 +111,9 @@ export default function AdminSchedules() {
   };
 
   const existingTimeSlots = existingSchedules.map(s => s.timeSlot);
+  
+  // Tổng hợp tất cả các khung giờ để hiển thị
+  const allSlotsToRender = Array.from(new Set([...defaultSlots, ...customSlots, ...existingTimeSlots])).sort();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -134,13 +149,30 @@ export default function AdminSchedules() {
             <div>
               <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
                 <h3 className="font-bold text-lg text-gray-800">Khung giờ ngày <span className="text-blue-600">{selectedDate.split('-').reverse().join('/')}</span></h3>
+                
+                {/* Chọn giờ tuỳ chỉnh */}
+                <div className="flex items-center space-x-2">
+                  <input 
+                    type="time" 
+                    value={customTimeInput} 
+                    onChange={(e) => setCustomTimeInput(e.target.value)} 
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                  />
+                  <button 
+                    onClick={handleAddCustomSlot} 
+                    className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
+                  >
+                    Thêm giờ
+                  </button>
+                </div>
+                
                 <button onClick={handleGenerateSchedules} disabled={selectedSlots.length === 0 || isLoading} className={`px-4 py-2 rounded-xl font-medium transition flex items-center ${selectedSlots.length === 0 || isLoading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'}`}>
                   <Plus className="w-4 h-4 mr-2" /> Tạo {selectedSlots.length} ca khám
                 </button>
               </div>
               {isLoading && existingSchedules.length === 0 ? <p className="text-gray-500 text-center py-8">Đang tải dữ liệu...</p> : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {defaultSlots.map(slot => {
+                  {allSlotsToRender.map(slot => {
                     const existingSchedule = existingSchedules.find(s => s.timeSlot === slot);
                     const isExisting = !!existingSchedule;
                     const isSelected = selectedSlots.includes(slot);
