@@ -69,20 +69,7 @@ export default function DoctorListPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Navbar đơn giản (Có thể thay bằng component Navbar của bạn) */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
-              <Activity className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">MediCare</span>
-            </div>
-            <button onClick={() => navigate('/')} className="text-gray-600 hover:text-blue-600 font-medium transition">
-              Về Trang chủ
-            </button>
-          </div>
-        </div>
-      </nav>
+
 
       {/* Header Banner */}
       <div className="bg-blue-600 py-16">
