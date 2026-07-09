@@ -199,7 +199,7 @@ export default function HomePage() {
       <footer id="footer" className="bg-gray-900 text-white py-12 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <span className="text-2xl font-black tracking-tight">Medi<span className="text-blue-500">Care</span></span>
+            <span className="text-2xl font-black tracking-tight">Medi<span className="text-blue-500">Pro</span></span>
             <p className="text-gray-400 mt-4 text-sm leading-relaxed">
               Nền tảng y tế số toàn diện, kết nối hàng triệu bệnh nhân với các bác sĩ và cơ sở y tế uy tín trên toàn quốc.
             </p>
@@ -215,9 +215,9 @@ export default function HomePage() {
           <div>
             <h4 className="font-bold text-lg mb-4">Liên hệ</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li>Hotline: 1900 1234</li>
-              <li>Email: support@medicare.vn</li>
-              <li>Địa chỉ: Tòa nhà Y Tế, Hà Nội</li>
+              <li>Hotline: 0325 472 935</li>
+              <li>Email: mediproadmin@gmail.com</li>
+              <li>Địa chỉ: Số 3, Đường Cầu Giấy, Phường Láng, Hà Nội</li>
             </ul>
           </div>
         </div>

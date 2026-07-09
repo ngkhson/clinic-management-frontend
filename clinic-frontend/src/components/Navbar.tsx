@@ -108,7 +108,7 @@ export default function Navbar() {
               <Activity className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
             </div>
             <span className="ml-3 text-2xl font-black text-gray-900 tracking-tight">
-              Medi<span className="text-blue-600">Care</span>
+              Medi<span className="text-blue-600">Pro</span>
             </span>
           </Link>
 

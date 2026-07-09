@@ -335,7 +335,7 @@ export default function ChatWidget() {
                     <button onClick={() => setView('LIST')} className="mr-2 p-1 hover:bg-blue-700 rounded"><ChevronLeft className="w-5 h-5" /></button>
                   )}
                   <div>
-                    <h3 className="font-bold text-sm">{isStaff ? activeContact : 'Phòng khám MediCare'}</h3>
+                    <h3 className="font-bold text-sm">{isStaff ? activeContact : 'Phòng khám MediPro'}</h3>
                     <p className="text-[10px] text-blue-100 flex items-center mt-0.5">
                       <Circle className={`w-2 h-2 mr-1 ${isConnected ? 'fill-green-400 text-green-400' : 'fill-gray-400 text-gray-400'}`} /> 
                       {isConnected ? 'Trực tuyến' : 'Đang kết nối...'}
