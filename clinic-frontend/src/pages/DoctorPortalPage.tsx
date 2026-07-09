@@ -7,17 +7,7 @@ import axios from 'axios';
 import DoctorDashboard from '../components/doctor/DoctorDashboard';
 import DoctorAppointments from '../components/doctor/DoctorAppointments';
 import MedicalRecordModal from '../components/doctor/MedicalRecordModal';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import apiClient from '../api/axiosConfig';
 
 interface Appointment { id: number; patientName: string; timeSlot: string; appointmentDate: string; status: string; symptoms: string; }
 interface MedicalService { id: number; name: string; category: string; price: number; isActive: boolean; }

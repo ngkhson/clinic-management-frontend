@@ -4,11 +4,7 @@ import {
   Search, HeartPulse, Stethoscope, CheckCircle2, ArrowRight, X, Clock 
 } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
+import apiClient from '../../api/axiosConfig';
 
 apiClient.interceptors.request.use((config: any) => {
   const token = localStorage.getItem('token');

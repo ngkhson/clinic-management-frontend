@@ -6,6 +6,7 @@ import axios from 'axios';
 // ⚠️ LƯU Ý QUAN TRỌNG KHI COPY VỀ MÁY CỦA BẠN (VS CODE):
 // 1. Hãy BỎ COMMENT dòng import dưới đây để sử dụng thư viện STOMP thật:
 import { Client } from '@stomp/stompjs';
+import apiClient from '../api/axiosConfig';
 // 2. XÓA BỎ đoạn "CLASS GIẢ LẬP" (từ dòng 11 đến 28) đi nhé!
 
 // --- CLASS GIẢ LẬP ĐỂ MÔI TRƯỜNG XEM TRƯỚC (CANVAS) KHÔNG BỊ LỖI ---
@@ -30,17 +31,6 @@ import { Client } from '@stomp/stompjs';
 //   }
 // }
 // --- KẾT THÚC CLASS GIẢ LẬP ---
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 interface ChatMessage {
   senderEmail: string;

@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, KeyRound, ArrowRight, Activity } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-});
+import apiClient from '../api/axiosConfig';
 
 export default function ForgotPasswordPage() {
   const navigate = useNavigate();

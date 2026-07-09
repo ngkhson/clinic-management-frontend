@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Tạo một instance (bản sao) của axios với cấu hình riêng
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api', // Địa chỉ Spring Boot của bạn
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api', // Địa chỉ Spring Boot từ biến môi trường
   headers: {
     'Content-Type': 'application/json',
   },

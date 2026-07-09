@@ -2,18 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Activity, LogOut, User, Calendar, LogIn, ChevronDown, UserRound, Bell, Clock } from 'lucide-react';
 import axios from 'axios';
+import apiClient from '../api/axiosConfig';
 
 // --- Cấu hình Axios ---
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 // Định nghĩa kiểu dữ liệu cho Thông báo
 interface AppNotification {

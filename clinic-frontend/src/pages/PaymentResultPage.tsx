@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, Home, Calendar, Loader2 } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
+import apiClient from '../api/axiosConfig';
 
 export default function PaymentResultPage() {
   const [searchParams] = useSearchParams();

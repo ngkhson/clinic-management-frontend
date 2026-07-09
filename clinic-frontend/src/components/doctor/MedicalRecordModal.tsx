@@ -5,20 +5,11 @@ import {
   Image as ImageIcon, UploadCloud, AlertTriangle
 } from 'lucide-react';
 import axios from 'axios';
+import apiClient from '../../api/axiosConfig';
 
 // ==========================================
 // 1. CẤU HÌNH API & INTERFACES
 // ==========================================
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 export interface Appointment { id: number; patientName: string; timeSlot: string; appointmentDate: string; status: string; symptoms: string; }
 export interface MedicalService { id: number; name: string; category: string; price: number; isActive: boolean; }

@@ -1,17 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, PlusSquare, Search, Trash2, CheckCircle2, Box } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import apiClient from '../../../api/axiosConfig';
 
 interface Supplier { id: number; name: string; }
 interface Medicine { id: number; name: string; unit: string; currentQuantity: number; isActive: boolean; }

@@ -2,10 +2,7 @@
 // import { Receipt, Banknote, CreditCard, CheckCircle2, Clock, FileText, Search, AlertCircle, X } from 'lucide-react';
 // import axios from 'axios';
 
-// const apiClient = axios.create({
-//   baseURL: 'http://localhost:8080/api',
-//   headers: { 'Content-Type': 'application/json' },
-// });
+// 
 
 // apiClient.interceptors.request.use((config: any) => {
 //   const token = localStorage.getItem('token');
@@ -274,11 +271,7 @@
 import React, { useState, useEffect } from 'react';
 import { Receipt, Banknote, CreditCard, CheckCircle2, Clock, FileText, Search, AlertCircle, X, Printer, QrCode, RefreshCw } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
+import apiClient from '../../api/axiosConfig';
 
 apiClient.interceptors.request.use((config: any) => {
   const token = localStorage.getItem('token');

@@ -2,11 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Filter, UserRound, MapPin, Star, ChevronRight, Activity } from 'lucide-react';
 import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-});
+import apiClient from '../api/axiosConfig';
 
 interface Doctor {
   id: number;
@@ -69,7 +65,6 @@ export default function DoctorListPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-
 
       {/* Header Banner */}
       <div className="bg-blue-600 py-16">
