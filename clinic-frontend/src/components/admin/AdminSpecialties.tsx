@@ -55,8 +55,9 @@ export default function AdminSpecialties() {
     try {
       await apiClient.delete(`/admin/specialties/${id}`);
       fetchSpecialties();
-    } catch (error) {
-      alert('Có lỗi xảy ra!');
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Có lỗi xảy ra!';
+      alert(msg);
     }
   };
 
