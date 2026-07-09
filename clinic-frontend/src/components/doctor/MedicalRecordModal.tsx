@@ -95,11 +95,39 @@ const LabResultEditor = ({ service, value, onChange }: { service: MedicalService
 
 // --- Form nhập Hình ảnh / Thăm dò chức năng ---
 const ImagingResultEditor = ({ service, value, onChange }: { service: MedicalService, value: string, onChange: (val: string) => void }) => {
-  let data = { description: '', conclusion: '' };
+  const [isUploading, setIsUploading] = useState(false);
+  let data: any = { description: '', conclusion: '', images: [] };
   try { if (value) data = JSON.parse(value); } catch (e) { /* fallback */ }
 
-  const updateField = (field: string, val: string) => {
+  const updateField = (field: string, val: any) => {
     onChange(JSON.stringify({ ...data, [field]: val }));
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    setIsUploading(true);
+    const newImages = [...(data.images || [])];
+    
+    for (let i = 0; i < e.target.files.length; i++) {
+      const file = e.target.files[i];
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await apiClient.post('/files/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        newImages.push(res.data.result);
+      } catch (err) {
+        console.error("Upload failed", err);
+      }
+    }
+    updateField('images', newImages);
+    setIsUploading(false);
+    // Reset file input so same file can be uploaded again if needed
+    e.target.value = '';
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = (data.images || []).filter((_: any, i: number) => i !== index);
+    updateField('images', newImages);
   };
 
   return (
@@ -119,12 +147,32 @@ const ImagingResultEditor = ({ service, value, onChange }: { service: MedicalSer
           <input type="text" value={data.conclusion} onChange={e => updateField('conclusion', e.target.value)} placeholder="Kết luận cuối cùng..." className="w-full p-2.5 bg-white border border-red-200 rounded-lg outline-none focus:ring-2 focus:ring-red-500 text-sm font-bold text-gray-900" />
         </div>
 
-        {/* Nút Upload giả lập */}
+        {/* Khu vực Upload ảnh */}
         <div className="pt-2">
-          <button className="flex items-center justify-center w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-purple-400 hover:text-purple-600 transition text-sm font-medium group">
-            <UploadCloud className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" /> Tải lên hình ảnh DICOM / Kết quả (Chưa hỗ trợ)
-          </button>
+          <label className={`flex items-center justify-center w-full py-3 border-2 border-dashed rounded-lg text-sm font-medium transition cursor-pointer ${isUploading ? 'border-gray-300 text-gray-400 bg-gray-50' : 'border-gray-300 text-gray-500 hover:bg-gray-50 hover:border-purple-400 hover:text-purple-600'}`}>
+            <UploadCloud className={`w-5 h-5 mr-2 ${isUploading ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} /> 
+            {isUploading ? 'Đang tải lên...' : 'Tải lên hình ảnh DICOM / Kết quả'}
+            <input type="file" multiple accept="image/*" onChange={handleUpload} className="hidden" disabled={isUploading} />
+          </label>
         </div>
+
+        {/* Danh sách ảnh đã upload */}
+        {data.images && data.images.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+            {data.images.map((imgUrl: string, idx: number) => (
+              <div key={idx} className="relative group rounded-lg overflow-hidden border border-gray-200 shadow-sm aspect-square bg-gray-50 flex items-center justify-center">
+                <img src={`http://localhost:8080${imgUrl}`} alt={`Result ${idx}`} className="object-cover w-full h-full" />
+                <button 
+                  onClick={() => removeImage(idx)} 
+                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  title="Xoá ảnh này"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -348,13 +396,16 @@ export default function MedicalRecordModal({ appointment, services, onClose, onS
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const resMed = await apiClient.get('/medicines');
-        const availableMeds = (resMed.data.result || resMed.data).filter((m: Medicine) => m.isActive && m.currentQuantity > 0);
+        const resMed = await apiClient.get('/medicines/all');
+        const medsData = resMed.data.result || resMed.data;
+        // In case it's still a paginated object somehow, try to extract .content, otherwise assume it's an array
+        const medsArray = Array.isArray(medsData) ? medsData : (medsData.content || []);
+        const availableMeds = medsArray.filter((m: Medicine) => m.isActive && m.currentQuantity > 0);
         setMedicines(availableMeds);
 
-        if (appointment.status === 'EXAMINING') {
+        if (appointment.status === 'EXAMINING' || appointment.status === 'CONFIRMED') {
           setIsLoadingDraft(true);
-          const resDraft = await apiClient.get(`/doctor/medical-records/appointment/${appointment.id}`);
+          const resDraft = await apiClient.get(`/doctor/medical-records/appointment/${appointment.id}?t=${Date.now()}`);
 
           if (resDraft.status === 200 && resDraft.data && resDraft.data.result) {
             const data = resDraft.data.result;
@@ -494,6 +545,11 @@ export default function MedicalRecordModal({ appointment, services, onClose, onS
               const data = JSON.parse(resultsMap[id]);
               if (data.description) prettyPrintResults += `+ Mô tả: ${data.description}\n`;
               if (data.conclusion) prettyPrintResults += `+ Kết luận: ${data.conclusion}\n`;
+              if (data.images && data.images.length > 0) {
+                data.images.forEach((img: string) => {
+                  prettyPrintResults += `[IMAGE:${img}]\n`;
+                });
+              }
             } catch (e) { prettyPrintResults += resultsMap[id] + '\n'; }
           }
           else {

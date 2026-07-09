@@ -448,88 +448,116 @@ export default function AdminBilling() {
   const formatMoney = (amount?: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 
   // --- TÍNH NĂNG IN HÓA ĐƠN ---
-  const handlePrintInvoice = (inv: Invoice) => {
+  const handlePrintInvoice = async (inv: Invoice) => {
     const printWindow = window.open('', '_blank', 'width=800,height=900');
     if (!printWindow) { alert("Vui lòng cho phép popup để in hóa đơn."); return; }
 
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="vi">
-      <head>
-        <meta charset="UTF-8">
-        <title>Hóa Đơn Thu Tiền - MediCare</title>
-        <style>
-          body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
-          .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 20px; margin-bottom: 30px; }
-          .title { font-size: 24px; font-weight: bold; margin: 0; text-transform: uppercase; color: #1e3a8a; }
-          .doc-title { text-align: center; margin-bottom: 30px; font-size: 22px; font-weight: bold; text-transform: uppercase; }
-          table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 16px; }
-          th, td { border: 1px solid #000; padding: 10px; text-align: left; }
-          .text-right { text-align: right; }
-          .font-bold { font-weight: bold; }
-          .footer { margin-top: 60px; display: flex; justify-content: space-between; font-size: 16px; }
-          .signature { text-align: center; width: 250px; }
-          @media print { body { padding: 0; } }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1 class="title">HỆ THỐNG Y TẾ MEDICARE</h1>
-          <div>Địa chỉ: 123 Đường Y Tế, Phường Sức Khỏe, Quận Trung Tâm</div>
-          <div>Hotline: 1900 1234 - Website: medicare.vn</div>
-        </div>
-        <div class="doc-title">HÓA ĐƠN THU TIỀN VIỆN PHÍ</div>
-        <div><strong>Mã Hóa Đơn:</strong> ${inv.type === 'RETAIL' ? 'RET' : 'INV'}-${inv.id}</div>
-        <div><strong>Tên bệnh nhân:</strong> ${inv.patientName}</div>
-        <div><strong>Bác sĩ chỉ định:</strong> BS. ${inv.doctorName}</div>
-        <div><strong>Hình thức thanh toán:</strong> ${inv.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản / Online'}</div>
-        <div><strong>Thời gian thu:</strong> ${inv.paidAt ? new Date(inv.paidAt).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN')}</div>
-        
-        <table>
-          <thead>
+    try {
+      // Gọi API để lấy chi tiết dịch vụ và thuốc
+      const res = await apiClient.get(`/invoices/${inv.id}/details`);
+      const details = res.data.result || res.data;
+      const services = details.services || [];
+      const medicines = details.medicines || [];
+
+      let servicesHtml = '';
+      if (services.length > 0) {
+        servicesHtml = `
+          <tr><td colspan="2" class="font-bold bg-gray-100" style="background-color: #f3f4f6;">Dịch vụ cận lâm sàng</td></tr>
+          ${services.map((s: any) => `
             <tr>
-              <th>Nội dung thu</th>
-              <th class="text-right">Thành tiền (VNĐ)</th>
+              <td style="padding-left: 20px;">- ${s.name}</td>
+              <td class="text-right">${formatMoney(s.price)}</td>
             </tr>
-          </thead>
-          <tbody>
+          `).join('')}
+        `;
+      }
+
+      let medicinesHtml = '';
+      if (medicines.length > 0) {
+        medicinesHtml = `
+          <tr><td colspan="2" class="font-bold bg-gray-100" style="background-color: #f3f4f6;">Đơn thuốc / Bán lẻ</td></tr>
+          ${medicines.map((m: any) => `
             <tr>
-              <td>1. Phí khám bệnh</td>
-              <td class="text-right">${formatMoney(inv.consultationFee)}</td>
+              <td style="padding-left: 20px;">- ${m.name} (${m.quantity} ${m.unit})</td>
+              <td class="text-right">${formatMoney(m.total)}</td>
             </tr>
-            <tr>
-              <td>2. Phí dịch vụ (Cận lâm sàng)</td>
-              <td class="text-right">${formatMoney(inv.serviceFee)}</td>
-            </tr>
-            <tr>
-              <td>3. Phí thuốc (Đơn thuốc điện tử)</td>
-              <td class="text-right">${formatMoney(inv.medicineFee)}</td>
-            </tr>
-            <tr>
-              <td class="font-bold text-right" style="font-size: 18px;">TỔNG CỘNG THANH TOÁN</td>
-              <td class="font-bold text-right" style="font-size: 18px; color: #2563eb;">${formatMoney(inv.totalAmount)}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div class="footer">
-          <div>
-            <p><strong>Ghi chú:</strong> Vui lòng giữ lại biên lai để đối chiếu khi cần thiết.</p>
+          `).join('')}
+        `;
+      }
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+          <meta charset="UTF-8">
+          <title>Hóa Đơn Thu Tiền - MediCare</title>
+          <style>
+            body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #111; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+            .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 20px; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: bold; margin: 0; text-transform: uppercase; color: #1e3a8a; }
+            .doc-title { text-align: center; margin-bottom: 30px; font-size: 22px; font-weight: bold; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 16px; }
+            th, td { border: 1px solid #000; padding: 10px; text-align: left; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
+            .footer { margin-top: 60px; display: flex; justify-content: space-between; font-size: 16px; }
+            .signature { text-align: center; width: 250px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="title">HỆ THỐNG Y TẾ MEDICARE</h1>
+            <div>Địa chỉ: 123 Đường Y Tế, Phường Sức Khỏe, Quận Trung Tâm</div>
+            <div>Hotline: 1900 1234 - Website: medicare.vn</div>
           </div>
-          <div class="signature">
-            <p>Ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}</p>
-            <p class="font-bold">Thu Ngân</p>
-            <br><br><br><br>
-            <p>(Ký, ghi rõ họ tên)</p>
+          <div class="doc-title">HÓA ĐƠN THU TIỀN VIỆN PHÍ</div>
+          <div><strong>Mã Hóa Đơn:</strong> ${inv.type === 'RETAIL' ? 'RET' : 'INV'}-${inv.id}</div>
+          <div><strong>Tên bệnh nhân:</strong> ${inv.patientName}</div>
+          <div><strong>Bác sĩ chỉ định:</strong> ${inv.doctorName ? 'BS. ' + inv.doctorName : 'N/A'}</div>
+          <div><strong>Hình thức thanh toán:</strong> ${inv.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản / Online'}</div>
+          <div><strong>Thời gian thu:</strong> ${inv.paidAt ? new Date(inv.paidAt).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN')}</div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Nội dung thu</th>
+                <th class="text-right">Thành tiền (VNĐ)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${servicesHtml}
+              ${medicinesHtml}
+              <tr>
+                <td class="font-bold text-right" style="font-size: 18px;">TỔNG CỘNG THANH TOÁN</td>
+                <td class="font-bold text-right" style="font-size: 18px; color: #2563eb;">${formatMoney(inv.totalAmount)}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="footer">
+            <div>
+              <p><strong>Ghi chú:</strong> Vui lòng giữ lại biên lai để đối chiếu khi cần thiết.</p>
+            </div>
+            <div class="signature">
+              <p>Ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}</p>
+              <p class="font-bold">Thu Ngân</p>
+              <br><br><br><br>
+              <p>(Ký, ghi rõ họ tên)</p>
+            </div>
           </div>
-        </div>
-      </body>
-      </html>
-    `;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => { printWindow.print(); }, 250);
+        </body>
+        </html>
+      `;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => { printWindow.print(); }, 250);
+    } catch (error) {
+      console.error("Lỗi khi tải chi tiết hóa đơn:", error);
+      alert("Có lỗi xảy ra khi tải chi tiết hóa đơn để in!");
+      printWindow.close();
+    }
   };
 
   // --- LỌC DỮ LIỆU ---

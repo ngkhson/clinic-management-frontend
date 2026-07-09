@@ -33,7 +33,7 @@ export default function HomePage() {
         // Gọi song song 2 API để tối ưu thời gian tải
         const [specsRes, docsRes] = await Promise.all([
           apiClient.get('/specialties'),
-          apiClient.get('/admin/doctors') // Dùng tạm API này, nhớ cấu hình permitAll() bên Spring Security
+          apiClient.get('/doctors')
         ]);
         
         const specsData = specsRes.data.result !== undefined ? specsRes.data.result : specsRes.data;

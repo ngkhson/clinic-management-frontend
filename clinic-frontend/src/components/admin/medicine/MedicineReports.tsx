@@ -79,7 +79,7 @@ export default function MedicineReports({ onBack }: { onBack: () => void }) {
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex justify-center items-center"><TrendingUp className="w-6 h-6"/></div>
                 </div>
-                <p className="text-gray-500 font-medium mb-1">Doanh thu bán lẻ</p>
+                <p className="text-gray-500 font-medium mb-1">Doanh thu xuất thuốc</p>
                 <h3 className="text-2xl font-black text-teal-600">{formatMoney(data.totalRetailRevenue)}</h3>
             </div>
 
@@ -95,7 +95,7 @@ export default function MedicineReports({ onBack }: { onBack: () => void }) {
 
           <div className="bg-white p-12 text-center rounded-2xl shadow-sm border border-gray-100 mt-6">
             <h3 className="text-2xl font-black text-gray-800 mb-2">Lợi nhuận gộp</h3>
-            <p className="text-gray-500 mb-6">Được tính từ (Doanh thu bán lẻ - Chi phí nhập kho)</p>
+            <p className="text-gray-500 mb-6">Được tính từ (Doanh thu xuất thuốc - Chi phí nhập kho)</p>
             <div className={`inline-block px-8 py-4 rounded-3xl border-4 ${data.totalRetailRevenue >= data.totalImportCost ? 'border-green-100 bg-green-50 text-green-700' : 'border-red-100 bg-red-50 text-red-700'}`}>
                <span className="text-4xl font-black">
                  {formatMoney(data.totalRetailRevenue - data.totalImportCost)}

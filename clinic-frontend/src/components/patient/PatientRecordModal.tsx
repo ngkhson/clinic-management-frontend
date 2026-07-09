@@ -8,6 +8,7 @@ export interface MedicalRecord {
   treatmentPlan: string;
   prescription: string;
   notes: string;
+  paraclinicalResults?: string;
   serviceNames?: string[];
   // THÊM MỚI: Nhận danh sách đơn thuốc từ hệ thống
   prescriptionDetails?: {
@@ -33,6 +34,16 @@ export default function PatientRecordModal({
   isOpen: boolean, record: MedicalRecord | null, isLoading: boolean, onClose: () => void
 }) {
   if (!isOpen) return null;
+  // Helper: Convert line breaks to <br> and [IMAGE:url] to <img>
+  const formatParaclinicalHTML = (text: string | undefined | null) => {
+    if (!text) return 'Không có kết quả.';
+    let html = text.replace(/\n/g, '<br>');
+    // Find all [IMAGE:url] and replace with img tag
+    html = html.replace(/\[IMAGE:(.*?)\]/g, (match, url) => {
+      return `<div style="text-align: center; margin: 15px 0;"><img src="http://localhost:8080${url}" style="width: 350px; height: 250px; object-fit: contain; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb; padding: 4px;" /></div>`;
+    });
+    return html;
+  };
 
   const handlePrint = () => {
     if (!record) return;
@@ -79,11 +90,9 @@ export default function PatientRecordModal({
         <div class="section-title">2. Kế hoạch điều trị:</div>
         <div class="content-box">${record.treatmentPlan}</div>
         
-        <div class="section-title">3. Chỉ định Cận lâm sàng:</div>
-        <div class="content-box">
-          ${record.serviceNames && record.serviceNames.length > 0
-        ? '<ul style="margin: 0; padding-left: 20px;">' + record.serviceNames.map(s => `<li>${s}</li>`).join('') + '</ul>'
-        : 'Không có chỉ định.'}
+        <div class="section-title">3. Kết quả Cận lâm sàng:</div>
+        <div class="content-box" style="font-family: inherit; line-height: 1.8;">
+          ${formatParaclinicalHTML(record.paraclinicalResults)}
         </div>
 
         <div class="section-title">4. Chỉ định dùng thuốc (Kê toa):</div>
@@ -200,19 +209,14 @@ export default function PatientRecordModal({
                   <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Kế hoạch điều trị</h4>
                   <p className="text-gray-700">{record.treatmentPlan}</p>
                 </div>
-                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm md:col-span-2">
                   <h4 className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center">
-                    <Activity className="w-4 h-4 mr-2" /> Chỉ định Cận lâm sàng
+                    <Activity className="w-4 h-4 mr-2" /> Kết quả Cận lâm sàng
                   </h4>
-                  {record.serviceNames && record.serviceNames.length > 0 ? (
-                    <ul className="list-disc pl-5 text-gray-700 font-medium space-y-1">
-                      {record.serviceNames.map((srv, idx) => (
-                        <li key={idx}>{srv}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 italic">Không có chỉ định Cận lâm sàng.</p>
-                  )}
+                  <div 
+                    className="text-gray-700 font-medium whitespace-pre-wrap leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: formatParaclinicalHTML(record.paraclinicalResults) }}
+                  ></div>
                 </div>
                 <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm md:col-span-2">
                   <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Lời dặn dò</h4>
