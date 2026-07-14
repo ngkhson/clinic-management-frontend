@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { MessageSquare, X, Send, ChevronLeft, Circle, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -68,11 +68,18 @@ export default function ChatWidget() {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Ref để lưu trữ giá trị state mới nhất cho callback WebSocket
+  const stateRef = useRef({ isOpen, view, activeContact });
+  useEffect(() => {
+    stateRef.current = { isOpen, view, activeContact };
+  }, [isOpen, view, activeContact]);
 
   // 2. Lắng nghe đăng nhập/đăng xuất
   useEffect(() => {
@@ -100,81 +107,19 @@ export default function ChatWidget() {
     return () => window.removeEventListener('authChange', handleAuthChange);
   }, [stompClient]);
 
-  // 3. Logic mở Chat & Tải dữ liệu ban đầu
+  // Fetch initial unread count when logged in
   useEffect(() => {
-    if (isOpen && !isGuest) {
-      if (isStaff && view === 'LIST') {
-        fetchActiveRooms();
-      } else if (!isStaff) {
-        fetchChatHistory(authInfo.email);
-      }
-      
-      if (!stompClient) {
-        connectToChat();
-      }
+    if (!isGuest) {
+      apiClient.get('/chat/unread')
+        .then(res => setTotalUnreadCount(res.data.result || 0))
+        .catch(err => console.error("Lỗi lấy số lượng tin chưa đọc", err));
     }
-  }, [isOpen, authInfo.email, view]);
+  }, [authInfo.email, isGuest]);
 
+  // Logic kết nối WebSocket (Luôn chạy ngầm để nhận thông báo realtime)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, view, isOpen, isLoadingHistory]);
+    if (isGuest) return;
 
-  const fetchActiveRooms = async () => {
-    try {
-      const res = await apiClient.get('/chat/rooms');
-      const formattedContacts = (res.data.result || res.data).map((room: any) => ({
-        email: room.patientEmail,
-        name: room.patientName,
-        lastMessage: room.lastMessage,
-        unreadCount: 0 
-      }));
-      setContacts(formattedContacts);
-    } catch (e) { console.error("Lỗi tải danh sách phòng", e); }
-  };
-
-  const fetchChatHistory = async (patientEmail: string) => {
-    setIsLoadingHistory(true);
-    try {
-      const res = await apiClient.get(`/chat/history?patientEmail=${patientEmail}`);
-      setMessages(res.data.result || res.data);
-    } catch (e) { console.error("Lỗi tải lịch sử chat", e); } finally {
-      setIsLoadingHistory(false);
-    }
-  };
-
-  // --- HÀM XỬ LÝ TIN NHẮN ĐẾN (DÙNG CHUNG CHO CẢ STAFF VÀ PATIENT) ---
-  const handleIncomingMessage = (receivedMessage: ChatMessage) => {
-    setMessages((prev) => [...prev, receivedMessage]);
-
-    if (isStaff) {
-       // Xác định ai là Khách hàng trong cuộc hội thoại này
-       // Nếu gửi cho STAFF -> Khách là người gửi. Nếu STAFF trả lời -> Khách là người nhận.
-       const contactEmail = receivedMessage.receiverEmail === 'STAFF' 
-              ? receivedMessage.senderEmail 
-              : receivedMessage.receiverEmail!;
-       
-       setContacts(prev => {
-          const existing = prev.find(c => c.email === contactEmail);
-          if (existing) {
-              return prev.map(c => c.email === contactEmail ? {
-                  ...c,
-                  lastMessage: receivedMessage.content,
-                  unreadCount: (activeContact === contactEmail && view === 'CHAT') ? 0 : c.unreadCount + 1
-              } : c);
-          } else {
-              return [{
-                  email: contactEmail,
-                  name: contactEmail.split('@')[0],
-                  lastMessage: receivedMessage.content,
-                  unreadCount: (activeContact === contactEmail && view === 'CHAT') ? 0 : 1
-              }, ...prev];
-          }
-       });
-    }
-  };
-
-  // --- KẾT NỐI WEBSOCKET ---
-  const connectToChat = () => {
     const client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       reconnectDelay: 5000,
@@ -200,7 +145,102 @@ export default function ChatWidget() {
 
     client.activate();
     setStompClient(client);
+
+    return () => {
+      client.deactivate();
+      setIsConnected(false);
+      setStompClient(null);
+    };
+  }, [isGuest, isStaff, authInfo.email]);
+
+  // Logic mở Chat & Tải dữ liệu
+  useEffect(() => {
+    if (isOpen && !isGuest) {
+      if (isStaff && view === 'LIST') {
+        fetchActiveRooms();
+      } else if (!isStaff) {
+        fetchChatHistory(authInfo.email);
+      }
+    }
+  }, [isOpen, authInfo.email, view]);
+
+  useLayoutEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages, view, isOpen, isLoadingHistory]);
+
+  const fetchActiveRooms = async () => {
+    try {
+      const res = await apiClient.get('/chat/rooms');
+      const formattedContacts = (res.data.result || res.data).map((room: any) => ({
+        email: room.patientEmail,
+        name: room.patientName,
+        lastMessage: room.lastMessage,
+        unreadCount: room.unreadCount || 0 
+      }));
+      setContacts(formattedContacts);
+      
+      // Update totalUnreadCount from rooms data
+      const totalUnread = formattedContacts.reduce((sum: number, c: any) => sum + c.unreadCount, 0);
+      setTotalUnreadCount(totalUnread);
+    } catch (e) { console.error("Lỗi tải danh sách phòng", e); }
   };
+
+  const fetchChatHistory = async (patientEmail: string) => {
+    setIsLoadingHistory(true);
+    try {
+      const res = await apiClient.get(`/chat/history?patientEmail=${patientEmail}`);
+      setMessages(res.data.result || res.data);
+      if (!isStaff) setTotalUnreadCount(0); // Đã xem lịch sử thì reset unread
+    } catch (e) { console.error("Lỗi tải lịch sử chat", e); } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // --- HÀM XỬ LÝ TIN NHẮN ĐẾN (DÙNG CHUNG CHO CẢ STAFF VÀ PATIENT) ---
+  const handleIncomingMessage = (receivedMessage: ChatMessage) => {
+    setMessages((prev) => [...prev, receivedMessage]);
+
+    const { isOpen: currentIsOpen, view: currentView, activeContact: currentActiveContact } = stateRef.current;
+
+    if (isStaff) {
+       // Xác định ai là Khách hàng trong cuộc hội thoại này
+       // Nếu gửi cho STAFF -> Khách là người gửi. Nếu STAFF trả lời -> Khách là người nhận.
+       const contactEmail = receivedMessage.receiverEmail === 'STAFF' 
+              ? receivedMessage.senderEmail 
+              : receivedMessage.receiverEmail!;
+       
+       
+       setContacts(prev => {
+          const existing = prev.find(c => c.email === contactEmail);
+          let newContacts;
+          if (existing) {
+              newContacts = prev.map(c => c.email === contactEmail ? {
+                  ...c,
+                  lastMessage: receivedMessage.content,
+                  unreadCount: (currentActiveContact === contactEmail && currentView === 'CHAT') ? 0 : c.unreadCount + 1
+              } : c);
+          } else {
+              newContacts = [{
+                  email: contactEmail,
+                  name: contactEmail.split('@')[0],
+                  lastMessage: receivedMessage.content,
+                  unreadCount: (currentActiveContact === contactEmail && currentView === 'CHAT') ? 0 : 1
+              }, ...prev];
+          }
+          return newContacts;
+       });
+       
+       if (!(currentActiveContact === contactEmail && currentView === 'CHAT')) {
+           setTotalUnreadCount(prev => prev + 1);
+       }
+    } else {
+       // Bệnh nhân nhận tin nhắn mới
+       if (!currentIsOpen) {
+           setTotalUnreadCount(prev => prev + 1);
+       }
+    }
+  };
+
 
   const disconnectChat = () => {
     setIsOpen(false);
@@ -214,7 +254,13 @@ export default function ChatWidget() {
     setActiveContact(contactEmail);
     setView('CHAT');
     fetchChatHistory(contactEmail);
-    setContacts(prev => prev.map(c => c.email === contactEmail ? { ...c, unreadCount: 0 } : c));
+    setContacts(prev => {
+      const target = prev.find(c => c.email === contactEmail);
+      if (target && target.unreadCount > 0) {
+        setTotalUnreadCount(total => Math.max(0, total - target.unreadCount));
+      }
+      return prev.map(c => c.email === contactEmail ? { ...c, unreadCount: 0 } : c);
+    });
   };
 
   const sendMessage = (e: React.FormEvent) => {
@@ -254,10 +300,16 @@ export default function ChatWidget() {
   return (
     <>
       {!isOpen && (
-        <button onClick={() => setIsOpen(true)} className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl hover:bg-blue-700 transition flex items-center justify-center z-50">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-2xl hover:bg-blue-700 transition-all hover:scale-105 active:scale-95 flex items-center justify-center z-50"
+        >
           <MessageSquare className="w-6 h-6" />
-          {isStaff && contacts.reduce((sum, c) => sum + c.unreadCount, 0) > 0 && (
-            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+          {/* Chấm đỏ cho cả Staff và Patient */}
+          {totalUnreadCount > 0 && (
+            <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse flex items-center justify-center text-[10px] font-bold">
+              {totalUnreadCount}
+            </span>
           )}
         </button>
       )}
@@ -336,7 +388,7 @@ export default function ChatWidget() {
               </div>
 
               <div className="flex-1 p-4 overflow-y-auto bg-gray-50 flex flex-col space-y-4">
-                {isLoadingHistory ? (
+                {isLoadingHistory && visibleMessages.length === 0 ? (
                   <div className="text-center text-gray-500 text-sm my-auto">Đang tải lịch sử tin nhắn...</div>
                 ) : visibleMessages.length === 0 ? (
                   <div className="text-center text-gray-500 text-xs my-auto bg-white p-3 rounded-lg border border-gray-100">
