@@ -38,9 +38,13 @@ export default function RegisterPage() {
       // Back-end sẽ trả về Token ngay sau khi đăng ký thành công
       const result = response.data.result || response.data;
       const token = result.token;
+      const refreshToken = result.refreshToken;
       
       // Lưu Token và Email vào LocalStorage
       localStorage.setItem('token', token);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
+      }
       localStorage.setItem('userEmail', formData.email);
       localStorage.setItem('role', 'PATIENT'); // Đăng ký mặc định là bệnh nhân
 
