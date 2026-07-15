@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserCircle, Mail, Phone, MapPin, Calendar as CalendarIcon, Save, Activity, ArrowLeft, KeyRound, Lock } from 'lucide-react';
+import { UserCircle, Mail, Phone, MapPin, Calendar as CalendarIcon, Save, Activity, ArrowLeft, KeyRound, Lock, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import apiClient from '../api/axiosConfig';
 
@@ -26,6 +26,9 @@ export default function UserProfilePage() {
   const [pwdForm, setPwdForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const [pwdMessage, setPwdMessage] = useState({ text: '', type: '' });
   const [isChangingPwd, setIsChangingPwd] = useState(false);
+  const [showOldPwd, setShowOldPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -197,21 +200,30 @@ export default function UserProfilePage() {
                 <label className="block text-sm font-bold text-gray-700 mb-2">Mật khẩu hiện tại</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input type="password" required value={pwdForm.oldPassword} onChange={e => setPwdForm({...pwdForm, oldPassword: e.target.value})} className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập mật khẩu cũ..." />
+                  <input type={showOldPwd ? "text" : "password"} required value={pwdForm.oldPassword} onChange={e => setPwdForm({...pwdForm, oldPassword: e.target.value})} className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập mật khẩu cũ..." />
+                  <button type="button" onClick={() => setShowOldPwd(!showOldPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500">
+                    {showOldPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Mật khẩu mới</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input type="password" required minLength={6} value={pwdForm.newPassword} onChange={e => setPwdForm({...pwdForm, newPassword: e.target.value})} className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ít nhất 6 ký tự" />
+                  <input type={showNewPwd ? "text" : "password"} required minLength={6} value={pwdForm.newPassword} onChange={e => setPwdForm({...pwdForm, newPassword: e.target.value})} className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ít nhất 6 ký tự" />
+                  <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500">
+                    {showNewPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input type="password" required minLength={6} value={pwdForm.confirmPassword} onChange={e => setPwdForm({...pwdForm, confirmPassword: e.target.value})} className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập lại mật khẩu mới" />
+                  <input type={showConfirmPwd ? "text" : "password"} required minLength={6} value={pwdForm.confirmPassword} onChange={e => setPwdForm({...pwdForm, confirmPassword: e.target.value})} className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nhập lại mật khẩu mới" />
+                  <button type="button" onClick={() => setShowConfirmPwd(!showConfirmPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500">
+                    {showConfirmPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
             </div>

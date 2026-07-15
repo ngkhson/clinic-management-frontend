@@ -20,4 +20,23 @@ apiClient.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Interceptor: Bắt các response có HTTP 200 nhưng bên trong chứa code báo lỗi (VD: code 400)
+apiClient.interceptors.response.use(
+  (response) => {
+    // Nếu backend trả về code báo lỗi (VD: 400, 404, 500) mà không phải 1000 (success) hoặc 200
+    if (response.data && typeof response.data.code === 'number' && response.data.code !== 1000 && response.data.code !== 200) {
+      return Promise.reject({
+        response: {
+          status: response.data.code,
+          data: response.data
+        }
+      });
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export default apiClient;

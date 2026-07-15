@@ -1,12 +1,13 @@
 // File: src/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, UserRound, Phone, ArrowRight } from 'lucide-react';
+import { Mail, Lock, UserRound, Phone, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import apiClient from '../api/axiosConfig';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   // Dùng 1 object state thay vì nhiều state lẻ tẻ cho gọn
@@ -157,15 +158,22 @@ export default function RegisterPage() {
                 <Lock className="h-5 w-5 text-gray-400" />
               </div>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 required
                 minLength={6}
-                className="block w-full pl-10 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                className="block w-full pl-10 pr-10 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-green-500"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
           </div>
 

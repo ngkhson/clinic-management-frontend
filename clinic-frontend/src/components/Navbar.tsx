@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Activity, LogOut, User, Calendar, LogIn, ChevronDown, UserRound, Bell, Clock } from 'lucide-react';
 import axios from 'axios';
 import apiClient from '../api/axiosConfig';
+import { Client } from '@stomp/stompjs';
 
 // --- Cấu hình Axios ---
 
@@ -10,7 +11,7 @@ import apiClient from '../api/axiosConfig';
 interface AppNotification {
   id: number;
   message: string;
-  isRead: boolean;
+  read: boolean;
   createdAt: string;
 }
 
@@ -31,7 +32,7 @@ export default function Navbar() {
   const userEmail = localStorage.getItem('userEmail');
   const role = localStorage.getItem('role');
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Xử lý đóng các dropdown khi click ra ngoài
   useEffect(() => {
@@ -47,14 +48,37 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Lấy thông báo định kỳ (Chỉ khi đã đăng nhập)
+  // Lấy thông báo lần đầu (Chỉ khi đã đăng nhập)
   useEffect(() => {
     if (userEmail) {
       fetchNotifications();
-      // Tự động quét thông báo mới mỗi 10 giây
-      const interval = setInterval(fetchNotifications, 10000);
-      return () => clearInterval(interval);
     }
+  }, [userEmail]);
+
+  // Lắng nghe thông báo Realtime qua WebSocket
+  useEffect(() => {
+    if (!userEmail) return;
+
+    const client = new Client({
+      brokerURL: 'ws://localhost:8080/ws',
+      reconnectDelay: 5000,
+      debug: (str: string) => console.log("Navbar STOMP:", str),
+    });
+
+    client.onConnect = () => {
+      console.log("Navbar STOMP Connected cho Thông báo!");
+      client.subscribe(`/queue/notifications/${userEmail}`, (msg: any) => {
+        const notif: AppNotification = JSON.parse(msg.body);
+        // Thêm thông báo mới lên đầu
+        setNotifications((prev) => [notif, ...prev]);
+      });
+    };
+
+    client.activate();
+
+    return () => {
+      client.deactivate();
+    };
   }, [userEmail]);
 
   const fetchNotifications = async () => {
@@ -69,14 +93,14 @@ export default function Navbar() {
   const markAsRead = async (id: number) => {
     try {
       await apiClient.put(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     } catch (e) { }
   };
 
   const markAllAsRead = async () => {
     try {
       await apiClient.put(`/notifications/read-all`);
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (e) { }
   };
 
@@ -143,8 +167,8 @@ export default function Navbar() {
                            </div>
                          ) : (
                            notifications.map(n => (
-                             <div key={n.id} onClick={() => !n.isRead && markAsRead(n.id)} className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!n.isRead ? 'bg-blue-50/30' : ''}`}>
-                               <p className={`text-sm leading-relaxed ${!n.isRead ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{n.message}</p>
+                             <div key={n.id} onClick={() => !n.read && markAsRead(n.id)} className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!n.read ? 'bg-blue-50/30' : ''}`}>
+                               <p className={`text-sm leading-relaxed ${!n.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{n.message}</p>
                                <p className="text-xs text-gray-400 mt-2 flex items-center">
                                  <Clock className="w-3 h-3 mr-1" /> {new Date(n.createdAt).toLocaleString('vi-VN')}
                                </p>

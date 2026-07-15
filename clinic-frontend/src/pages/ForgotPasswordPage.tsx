@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, KeyRound, ArrowRight, Activity } from 'lucide-react';
+import { Mail, Lock, KeyRound, ArrowRight, Activity, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import apiClient from '../api/axiosConfig';
 
@@ -11,6 +11,8 @@ export default function ForgotPasswordPage() {
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -96,14 +98,20 @@ export default function ForgotPasswordPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Mật khẩu mới</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input required type="password" minLength={6} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="block w-full pl-12 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" />
+                <input required type={showNewPwd ? "text" : "password"} minLength={6} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="block w-full pl-12 pr-10 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" />
+                <button type="button" onClick={() => setShowNewPwd(!showNewPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500">
+                  {showNewPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input required type="password" minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="block w-full pl-12 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" />
+                <input required type={showConfirmPwd ? "text" : "password"} minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="block w-full pl-12 pr-10 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" />
+                <button type="button" onClick={() => setShowConfirmPwd(!showConfirmPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500">
+                  {showConfirmPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
             <button type="submit" disabled={isLoading} className="w-full flex items-center justify-center py-3 px-4 rounded-xl shadow-sm text-white font-bold bg-blue-600 hover:bg-blue-700 transition">

@@ -59,6 +59,23 @@ function SpecialtyDetailPageContent() {
     fetchTimeSlots();
   }, [id, selectedDate]);
 
+  const isTimeSlotValid = (dateStr: string, timeSlotStr: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(dateStr);
+    selected.setHours(0, 0, 0, 0);
+    
+    if (selected > today) return true;
+    if (selected < today) return false;
+    
+    const startStr = timeSlotStr.split('-')[0].trim();
+    const [hours, minutes] = startStr.split(':').map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+    
+    return slotTime.getTime() >= Date.now() - 15 * 60 * 1000;
+  };
+
   const executeBooking = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -146,9 +163,10 @@ function SpecialtyDetailPageContent() {
                   {isLoading ? <div className="text-sm text-gray-500 text-center py-4">Đang tải lịch làm việc...</div> : timeSlots.length === 0 ? <div className="text-sm text-red-500 bg-red-50 p-4 rounded-xl border border-red-100 text-center">Chuyên khoa không có lịch làm việc vào ngày này.</div> : (
                     <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                       {timeSlots.map((timeSlot) => {
+                        const isValid = isTimeSlotValid(selectedDate, timeSlot);
                         const isSelected = selectedTimeSlot === timeSlot;
                         return (
-                          <button key={timeSlot} onClick={() => setSelectedTimeSlot(timeSlot)} className={`flex items-center justify-center px-4 py-3 rounded-xl border text-sm font-bold transition-all ${isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-md ring-2 ring-blue-200 ring-offset-1' : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 shadow-sm'}`}>
+                          <button key={timeSlot} disabled={!isValid} onClick={() => setSelectedTimeSlot(timeSlot)} className={`flex items-center justify-center px-4 py-3 rounded-xl border text-sm font-bold transition-all ${!isValid ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-md ring-2 ring-blue-200 ring-offset-1' : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 shadow-sm'}`}>
                             <Clock className={`w-4 h-4 mr-2 ${isSelected ? 'text-blue-200' : 'text-gray-400'}`} />{timeSlot}
                           </button>
                         );

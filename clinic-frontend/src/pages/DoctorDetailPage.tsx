@@ -83,6 +83,23 @@ function DoctorDetailPageContent() {
     fetchSchedules();
   }, [id, selectedDate]);
 
+  const isTimeSlotValid = (dateStr: string, timeSlotStr: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selected = new Date(dateStr);
+    selected.setHours(0, 0, 0, 0);
+    
+    if (selected > today) return true;
+    if (selected < today) return false;
+    
+    const startStr = timeSlotStr.split('-')[0].trim();
+    const [hours, minutes] = startStr.split(':').map(Number);
+    const slotTime = new Date();
+    slotTime.setHours(hours, minutes, 0, 0);
+    
+    return slotTime.getTime() >= Date.now() - 15 * 60 * 1000;
+  };
+
   const executeBooking = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -179,7 +196,10 @@ function DoctorDetailPageContent() {
                   {isLoading ? <div className="text-sm text-gray-500 text-center py-4">Đang tải lịch làm việc...</div> : schedules.length === 0 ? <div className="text-sm text-red-500 bg-red-50 p-4 rounded-xl border border-red-100 text-center">Bác sĩ không có lịch làm việc vào ngày này.</div> : (
                     <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                       {schedules.map((sch) => {
-                        const isAvail = sch.available !== undefined ? sch.available : (sch as any).isAvailable !== false;
+                        let isAvail = sch.available !== undefined ? sch.available : (sch as any).isAvailable !== false;
+                        if (isAvail) {
+                          isAvail = isTimeSlotValid(selectedDate, sch.timeSlot);
+                        }
                         const isSelected = selectedScheduleId === sch.id;
                         return (
                           <button key={sch.id} disabled={!isAvail} onClick={() => setSelectedScheduleId(sch.id)} className={`flex items-center justify-center px-4 py-3 rounded-xl border text-sm font-bold transition-all ${!isAvail ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : isSelected ? 'bg-blue-600 border-blue-600 text-white shadow-md ring-2 ring-blue-200 ring-offset-1' : 'bg-white border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600 shadow-sm'}`}>
