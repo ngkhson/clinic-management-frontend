@@ -18,11 +18,11 @@ interface AppNotification {
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // State cho Menu User
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // State cho Menu Thông báo
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -116,7 +116,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          
+
           {/* Logo bên trái */}
           <Link to="/" className="flex items-center group">
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300">
@@ -131,17 +131,19 @@ export default function Navbar() {
           <div className="hidden md:flex space-x-8">
             <Link to="/" className={`font-semibold transition-colors ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>Trang chủ</Link>
             <Link to="/doctors" className={`font-semibold transition-colors ${location.pathname === '/doctors' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>Tìm Bác sĩ</Link>
-            <a href="#footer" className="text-gray-600 hover:text-blue-600 font-semibold transition-colors">Liên hệ</a>
+            <Link to="/specialties" className={`font-semibold transition-colors ${location.pathname === '/specialties' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>Chuyên Khoa</Link>
+            <Link to="/health-guide" className={`font-semibold transition-colors ${location.pathname.startsWith('/health-guide') ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>Cẩm nang</Link>
+            <Link to="/contact" className={`font-semibold transition-colors ${location.pathname === '/contact' ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'}`}>Liên Hệ</Link>
           </div>
 
           {/* Khu vực Đăng nhập / Cá nhân bên phải */}
           <div className="flex items-center">
             {userEmail ? (
               <div className="flex items-center">
-                
+
                 {/* --- QUẢ CHUÔNG THÔNG BÁO --- */}
                 <div className="relative mr-2 sm:mr-4" ref={notifRef}>
-                  <button 
+                  <button
                     onClick={() => { setIsNotifOpen(!isNotifOpen); setIsOpen(false); }}
                     className="relative p-2 text-gray-500 hover:bg-gray-100 hover:text-blue-600 rounded-full transition"
                   >
@@ -160,21 +162,21 @@ export default function Navbar() {
                         )}
                       </div>
                       <div className="max-h-80 overflow-y-auto divide-y divide-gray-50 custom-scrollbar">
-                         {notifications.length === 0 ? (
-                           <div className="p-8 text-center text-gray-500 text-sm">
-                              <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                              Chưa có thông báo nào.
-                           </div>
-                         ) : (
-                           notifications.map(n => (
-                             <div key={n.id} onClick={() => !n.read && markAsRead(n.id)} className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!n.read ? 'bg-blue-50/30' : ''}`}>
-                               <p className={`text-sm leading-relaxed ${!n.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{n.message}</p>
-                               <p className="text-xs text-gray-400 mt-2 flex items-center">
-                                 <Clock className="w-3 h-3 mr-1" /> {new Date(n.createdAt).toLocaleString('vi-VN')}
-                               </p>
-                             </div>
-                           ))
-                         )}
+                        {notifications.length === 0 ? (
+                          <div className="p-8 text-center text-gray-500 text-sm">
+                            <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                            Chưa có thông báo nào.
+                          </div>
+                        ) : (
+                          notifications.map(n => (
+                            <div key={n.id} onClick={() => !n.read && markAsRead(n.id)} className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!n.read ? 'bg-blue-50/30' : ''}`}>
+                              <p className={`text-sm leading-relaxed ${!n.read ? 'font-bold text-gray-900' : 'text-gray-600'}`}>{n.message}</p>
+                              <p className="text-xs text-gray-400 mt-2 flex items-center">
+                                <Clock className="w-3 h-3 mr-1" /> {new Date(n.createdAt).toLocaleString('vi-VN')}
+                              </p>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   )}
@@ -182,7 +184,7 @@ export default function Navbar() {
 
                 {/* --- MENU NGƯỜI DÙNG --- */}
                 <div className="relative" ref={dropdownRef}>
-                  <button 
+                  <button
                     onClick={() => { setIsOpen(!isOpen); setIsNotifOpen(false); }}
                     className="flex items-center space-x-2 bg-gray-50 hover:bg-gray-100 px-4 py-2 rounded-full transition-colors border border-gray-200"
                   >
@@ -201,17 +203,17 @@ export default function Navbar() {
                       </div>
 
                       {role === 'ADMIN' ? (
-                         <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
-                           <Activity className="w-4 h-4 mr-3" /> Trang Quản trị
-                         </Link>
+                        <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                          <Activity className="w-4 h-4 mr-3" /> Trang Quản trị
+                        </Link>
                       ) : role === 'DOCTOR' ? (
-                         <Link to="/doctor-portal" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
-                           <Activity className="w-4 h-4 mr-3" /> Bảng Điều Khiển
-                         </Link>
+                        <Link to="/doctor-portal" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                          <Activity className="w-4 h-4 mr-3" /> Bảng Điều Khiển
+                        </Link>
                       ) : (
-                         <Link to="/patient-dashboard" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
-                           <Calendar className="w-4 h-4 mr-3 text-blue-500" /> Hồ sơ & Lịch khám
-                         </Link>
+                        <Link to="/patient-dashboard" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
+                          <Calendar className="w-4 h-4 mr-3 text-blue-500" /> Hồ sơ & Lịch khám
+                        </Link>
                       )}
 
                       <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition font-medium">
@@ -219,8 +221,8 @@ export default function Navbar() {
                       </Link>
 
                       <div className="border-t border-gray-100 my-1"></div>
-                      
-                      <button 
+
+                      <button
                         onClick={handleLogout}
                         className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition font-medium"
                       >
@@ -241,7 +243,7 @@ export default function Navbar() {
               </div>
             )}
           </div>
-          
+
         </div>
       </div>
     </nav>

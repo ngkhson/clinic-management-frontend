@@ -500,9 +500,9 @@ export default function AdminBilling() {
         </head>
         <body>
           <div class="header">
-            <h1 class="title">HỆ THỐNG Y TẾ MEDICARE</h1>
-            <div>Địa chỉ: 123 Đường Y Tế, Phường Sức Khỏe, Quận Trung Tâm</div>
-            <div>Hotline: 1900 1234 - Website: medicare.vn</div>
+            <h1 class="title">HỆ THỐNG Y TẾ MEDIPRO</h1>
+              <div>Địa chỉ: Số 3 Phố Cầu Giấy, Phường Láng, Hà Nội</div>
+              <div>Hotline: 0325 472 935 - Website: medipro.vn</div>
           </div>
           <div class="doc-title">HÓA ĐƠN THU TIỀN VIỆN PHÍ</div>
           <div><strong>Mã Hóa Đơn:</strong> ${inv.type === 'RETAIL' ? 'RET' : 'INV'}-${inv.id}</div>

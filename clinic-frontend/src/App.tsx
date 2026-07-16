@@ -9,13 +9,21 @@ import DoctorPortalPage from './pages/DoctorPortalPage';
 import AdminPortalPage from './pages/AdminPortalPage';
 import PatientDashboardPage from './pages/PatientDashboardPage';
 import Navbar from './components/Navbar';
+import ConditionalFooter from './components/ConditionalFooter';
 import ChatWidget from './components/ChatWidget';
+import ScrollToTop from './components/ScrollToTop';
 import DoctorListPage from './pages/DoctorListPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ContactPage from './pages/ContactPage';
 import AdminMedicinePage from './pages/AdminMedicinePage';
 import PaymentResultPage from './pages/PaymentResultPage';
 import SpecialtyDetailPage from './pages/SpecialtyDetailPage';
+import SpecialtiesPage from './pages/SpecialtiesPage';
+import HealthGuidePage from './pages/HealthGuidePage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 
 // Một component trang chủ tạm thời để test sau khi đăng nhập thành công
 // const TemporaryHomePage = () => {
@@ -54,10 +62,13 @@ import SpecialtyDetailPage from './pages/SpecialtyDetailPage';
 
 function App() {
   return (
-    <BrowserRouter>
-    {/* Đặt Navbar nằm ngoài Routes để nó luôn hiển thị ở mọi trang */}
-      <Navbar />
-      <Routes>
+    <div className="flex flex-col min-h-screen">
+      <BrowserRouter>
+        <ScrollToTop />
+      {/* Đặt Navbar nằm ngoài Routes để nó luôn hiển thị ở mọi trang */}
+        <Navbar />
+        <div className="flex-grow flex flex-col">
+          <Routes>
         {/* Đường dẫn mặc định (Trang chủ) */}
         <Route path="/" element={<HomePage />} />
         
@@ -66,6 +77,7 @@ function App() {
         {/* Đường dẫn Đăng ký */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/doctor/:id" element={<DoctorDetailPage />} />
+        <Route path="/specialties" element={<SpecialtiesPage />} />
         <Route path="/specialty/:id" element={<SpecialtyDetailPage />} />
         <Route path="/doctor-portal" element={<DoctorPortalPage />} />
         <Route path="/admin" element={<AdminPortalPage />} />
@@ -73,11 +85,19 @@ function App() {
         <Route path="/doctors" element={<DoctorListPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/admin/medicines" element={<AdminMedicinePage />} />
-        <Route path="/payment-result" element={<PaymentResultPage />} />
-      </Routes>
-      <ChatWidget />
-    </BrowserRouter>
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/health-guide" element={<HealthGuidePage />} />
+        <Route path="/health-guide/article/:id" element={<ArticleDetailPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="/admin/medicines" element={<AdminMedicinePage />} />
+          <Route path="/payment-result" element={<PaymentResultPage />} />
+        </Routes>
+        </div>
+        <ConditionalFooter />
+        <ChatWidget />
+      </BrowserRouter>
+    </div>
   );
 }
 

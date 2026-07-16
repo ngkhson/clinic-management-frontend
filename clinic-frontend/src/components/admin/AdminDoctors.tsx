@@ -3,7 +3,7 @@ import { Plus, Edit, Trash2, X, UserRound, Search, ChevronLeft, ChevronRight } f
 import axios from 'axios';
 import apiClient from '../../api/axiosConfig';
 
-interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; }
+interface Doctor { id: number; fullName: string; degree: string; specialtyName: string; biography: string; imageUrl?: string; }
 interface Specialty { id: number; name: string; }
 
 export default function AdminDoctors() {
@@ -19,7 +19,7 @@ export default function AdminDoctors() {
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [docMode, setDocMode] = useState<'ADD' | 'EDIT'>('ADD');
   const [selectedDocIdForEdit, setSelectedDocIdForEdit] = useState<number | null>(null);
-  const [docForm, setDocForm] = useState({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '' });
+  const [docForm, setDocForm] = useState({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '', imageUrl: '' });
 
   useEffect(() => {
     fetchDoctors();
@@ -82,7 +82,7 @@ export default function AdminDoctors() {
   const openAddDoctorModal = () => {
     setDocMode('ADD');
     setSelectedDocIdForEdit(null);
-    setDocForm({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '' });
+    setDocForm({ email: '', password: '', fullName: '', specialtyId: '', degree: '', biography: '', imageUrl: '' });
     setIsDocModalOpen(true);
   };
 
@@ -96,7 +96,8 @@ export default function AdminDoctors() {
       fullName: doc.fullName, 
       specialtyId: spec ? spec.id.toString() : '', 
       degree: doc.degree, 
-      biography: doc.biography
+      biography: doc.biography,
+      imageUrl: doc.imageUrl || ''
     });
     setIsDocModalOpen(true);
   };
@@ -194,7 +195,7 @@ export default function AdminDoctors() {
                   </select>
                 </div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Học vị <span className="text-red-500">*</span></label><input required type="text" value={docForm.degree} onChange={(e) => setDocForm({...docForm, degree: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="VD: ThS. BS." /></div>
-
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Đường dẫn hình ảnh (URL)</label><input type="text" value={docForm.imageUrl} onChange={(e) => setDocForm({...docForm, imageUrl: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none" placeholder="VD: https://example.com/avatar.jpg" /></div>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Giới thiệu chi tiết</label><textarea value={docForm.biography} onChange={(e) => setDocForm({...docForm, biography: e.target.value})} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none resize-none" rows={3} placeholder="Kinh nghiệm làm việc, thế mạnh chuyên môn..."></textarea></div>
             </form>

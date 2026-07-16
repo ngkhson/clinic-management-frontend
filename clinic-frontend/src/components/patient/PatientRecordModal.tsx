@@ -78,8 +78,8 @@ export default function PatientRecordModal({
       </head>
       <body>
         <div class="header">
-          <h1 class="title">HỆ THỐNG Y TẾ MEDICARE</h1>
-          <div class="subtitle">Địa chỉ: 123 Đường Y Tế, Phường Sức Khỏe, Quận Trung Tâm<br>Hotline: 1900 1234 - Website: medicare.vn</div>
+          <h1 class="title">HỆ THỐNG Y TẾ MEDIPRO</h1>
+          <div class="subtitle">Địa chỉ: Số 3 Phố Cầu Giấy, Phường Láng, Hà Nội<br>Hotline: 0325 472 935 - Website: medipro.vn</div>
         </div>
         <div class="doc-title">HỒ SƠ BỆNH ÁN & ĐƠN THUỐC</div>
         <div class="info-row"><span><strong>Họ và tên bệnh nhân:</strong> ${patientName}</span><span><strong>Ngày khám:</strong> ${dateFormatted}</span></div>
