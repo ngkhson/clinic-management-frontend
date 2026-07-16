@@ -4,7 +4,6 @@ import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // LƯU Ý CHO ADMIN: Thay thế Token của bạn tại đây để bản đồ hoạt động
-// const MAPBOX_TOKEN = 'pk.eyJ1IjoibmdraHNvbiIsImEiOiJjbW50eXltNjUwZm8wMnBvaG01bXAycHplIn0.xMgmt6L438TR7CIIFESuIQ'; // Token mẫu
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
 export default function ContactPage() {
